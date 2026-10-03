@@ -1,0 +1,2840 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--PWA-HEAD-START-->
+    <meta name="theme-color" content="#0a0a17">
+    <meta name="application-name" content="iWallet">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="iWallet">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <!--PWA-HEAD-END-->
+    <title>iWallet - Tracker Pengeluaran Remaja</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Google Fonts Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Glassmorphism Core Styling */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+        }
+
+        .glass-card-dark {
+            background: rgba(18, 18, 28, 0.65);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.35);
+        }
+
+        .glass-pill {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .glass-modal {
+            background: rgba(15, 15, 26, 0.94);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+        }
+
+        /* Animated Blob BG */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+
+        .animate-blob {
+            animation: blob 8s infinite alternate ease-in-out;
+        }
+
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* ===== Login Screen (iOS Glass) ===== */
+        .login-hidden { display: none !important; }
+
+        #login-screen {
+            background:
+                radial-gradient(120% 70% at 15% 0%, rgba(139, 92, 246, 0.35), transparent 60%),
+                radial-gradient(100% 60% at 100% 100%, rgba(59, 130, 246, 0.28), transparent 60%),
+                #0a0a17;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.09);
+            backdrop-filter: blur(28px) saturate(170%);
+            -webkit-backdrop-filter: blur(28px) saturate(170%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 24px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .login-sheet {
+            background: rgba(20, 20, 36, 0.82);
+            backdrop-filter: blur(32px) saturate(170%);
+            -webkit-backdrop-filter: blur(32px) saturate(170%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.6rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #fff;
+            outline: none;
+            transition: border-color .2s, background .2s;
+        }
+        .login-input::placeholder { color: rgba(203, 213, 225, 0.5); font-weight: 500; }
+        .login-input:focus { border-color: rgba(192, 132, 252, 0.9); background: rgba(255, 255, 255, 0.14); }
+
+        .login-btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef 60%, #ec4899);
+            box-shadow: 0 10px 28px rgba(168, 85, 247, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        }
+
+        .login-btn-glass {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+        .login-btn-glass:hover { background: rgba(255, 255, 255, 0.2); }
+
+        .otp-box {
+            width: 100%;
+            aspect-ratio: 1 / 1.15;
+            max-width: 48px;
+            text-align: center;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 14px;
+            outline: none;
+            transition: border-color .15s, background .15s, transform .15s;
+        }
+        .otp-box:focus { border-color: rgba(192, 132, 252, 0.95); background: rgba(255, 255, 255, 0.16); transform: translateY(-1px); }
+
+        @keyframes login-shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(7px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(3px); }
+        }
+        .login-shake { animation: login-shake .4s ease; }
+
+        #otp-banner {
+            transform: translateY(-140%);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform .45s cubic-bezier(.2, .9, .3, 1.1), opacity .3s;
+            background: rgba(38, 38, 58, 0.72);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .animate-blob, .login-shake { animation: none !important; }
+            #otp-banner { transition: none; }
+        }
+    </style>
+
+    <!-- Tailwind CSS hasil build (jalankan: npm run build) -->
+    <link rel="stylesheet" href="output.css">
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex justify-center items-center p-0 md:p-6 overflow-x-hidden selection:bg-purple-500 selection:text-white">
+
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-10 left-1/4 w-72 h-72 bg-purple-600 rounded-full filter blur-[100px] opacity-50 animate-blob"></div>
+        <div class="absolute top-1/3 right-10 w-80 h-80 bg-blue-600 rounded-full filter blur-[120px] opacity-40 animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-10 left-1/3 w-96 h-96 bg-pink-600 rounded-full filter blur-[130px] opacity-45 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- Mobile App Container -->
+    <div class="w-full max-w-md h-screen md:h-[880px] md:rounded-[48px] bg-slate-900/60 border border-white/10 shadow-2xl relative flex flex-col overflow-hidden z-10 backdrop-blur-3xl">
+        
+        <!-- Header Bar -->
+        <header class="p-6 pb-2 flex justify-between items-center z-20">
+            <div class="flex items-center gap-3">
+                <div class="relative cursor-pointer" onclick="openModal('profile-modal')">
+                    <img src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 1 1%27%3E%3Crect width=%271%27 height=%271%27 fill=%27%238B5CF6%27/%3E%3C/svg%3E" alt="Avatar" class="w-11 h-11 rounded-2xl object-cover border-2 border-purple-500/50 shadow-lg" id="user-avatar" />
+                    <span class="absolute -bottom-1 -right-1 bg-emerald-500 w-3.5 h-3.5 rounded-full border-2 border-slate-900" id="user-status-dot"></span>
+                </div>
+                <div>
+                    <span class="text-[10px] text-purple-400 font-bold tracking-widest uppercase flex items-center gap-1">
+                        <i data-lucide="wallet" class="w-3 h-3"></i> iWallet App
+                    </span>
+                    <h2 class="text-base font-extrabold text-white leading-tight" id="user-name-display">Halo, Alex! 👋</h2>
+                </div>
+            </div>
+            <button onclick="openModal('profile-modal')" class="glass-pill p-2.5 rounded-2xl hover:bg-white/20 transition active:scale-95 text-white/90" title="Pengaturan Profil">
+                <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+            </button>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto px-6 pt-2 pb-32 hide-scrollbar space-y-6">
+            
+            <section id="view-home" class="space-y-6 transition-all duration-300">
+                <!-- Main Balance Card (Apple Wallet Style) -->
+                <div class="glass-card rounded-[32px] p-6 relative overflow-hidden group">
+                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-full blur-2xl"></div>
+                    
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs uppercase font-semibold text-purple-200/80 tracking-wider">Sisa Dana Utama</span>
+                        <span id="health-badge" class="px-3 py-1 rounded-full text-[10px] font-extrabold tracking-wide uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Aman 👍</span>
+                    </div>
+
+                    <div class="flex items-baseline gap-1 mb-6">
+                        <span class="text-xl font-medium text-slate-300">Rp</span>
+                        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight" id="main-balance">0</h1>
+                    </div>
+
+                    <!-- Income vs Expense Quick View -->
+                    <div class="grid grid-cols-2 gap-3 pt-4 border-t border-white/10">
+                        <div class="flex items-center gap-2.5">
+                            <div class="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/20">
+                                <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-slate-400 font-medium">Uang Masuk</p>
+                                <p class="text-xs sm:text-sm font-bold text-emerald-300" id="total-income">Rp 0</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <div class="p-2 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/20">
+                                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <p class="text-[11px] text-slate-400 font-medium">Pengeluaran</p>
+                                <p class="text-xs sm:text-sm font-bold text-rose-300" id="total-expense">Rp 0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plotted vs Unplotted Summary Pill -->
+                <div id="plotting-summary-card" class="glass-card-dark rounded-2xl p-3.5 border border-purple-500/20 flex justify-between items-center text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="p-2 rounded-xl bg-purple-500/20 text-purple-300">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-medium">Total Dana Di-Plotting</p>
+                            <p class="font-bold text-purple-300" id="summary-plotted-amount">Rp 0</p>
+                        </div>
+                    </div>
+                    <button onclick="switchTab('budget')" class="text-[11px] font-bold text-purple-400 hover:underline flex items-center gap-1">
+                        Kelola Plotting <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+
+                <!-- Monthly Budget Progress Bar -->
+                <div class="glass-card-dark rounded-2xl p-4 border border-white/10">
+                    <div class="flex justify-between items-center text-xs mb-2">
+                        <span class="text-slate-400 font-medium flex items-center gap-1.5">
+                            <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-purple-400"></i> Indikator Anggaran Bulan Ini
+                        </span>
+                        <span class="font-bold text-purple-300" id="budget-percentage">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800/80 rounded-full h-2.5 overflow-hidden p-0.5 border border-white/5">
+                        <div id="budget-bar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-slate-400 mt-2">
+                        <span>Terpakai: <strong class="text-slate-200" id="budget-used">Rp 0</strong></span>
+                        <span>Batas: <strong class="text-slate-200" id="budget-limit">Rp 0</strong></span>
+                    </div>
+                </div>
+
+                <!-- Quick Category Action Badges -->
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs font-bold text-slate-200 tracking-wide uppercase">Catat Cepat</h3>
+                        <button type="button" onclick="openCategories()" class="text-[11px] text-purple-400 font-semibold hover:text-purple-300 flex items-center gap-1 transition">Kelola Kategori <i data-lucide="chevron-right" class="w-3 h-3"></i></button>
+                    </div>
+                    <div class="flex gap-2.5 overflow-x-auto pb-2 hide-scrollbar" id="quick-categories-container">
+                        <!-- Dynamic Quick Badges -->
+                    </div>
+                </div>
+
+                <!-- Recent Grouped Transactions Feed -->
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-200 tracking-wide uppercase">Transaksi Terakhir</h3>
+                            <p class="text-[10px] text-slate-400">Dikelompokkan per kategori (Klik untuk rincian)</p>
+                        </div>
+                        <button onclick="clearAllTransactions()" class="text-xs text-rose-400 hover:underline flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i> Hapus Semua
+                        </button>
+                    </div>
+                    <div id="transaction-list" class="space-y-3">
+                        <!-- Grouped Category Cards with Accordion List -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-analytics" class="hidden space-y-6 transition-all duration-300">
+                <div class="space-y-3">
+                    <h2 class="text-lg font-bold text-white">Analisis Pengeluaran</h2>
+                    
+                    <!-- Interconnected Filters: Responsive 3-Column Grid for Week, Month, Year -->
+                    <div class="grid grid-cols-3 gap-1.5 w-full glass-pill p-1 rounded-2xl">
+                        <button onclick="openWeekSelectorModal()" id="btn-week-select" class="text-[11px] px-2 py-2 rounded-xl font-semibold transition bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center gap-1 truncate border border-white/5">
+                            <i data-lucide="calendar" class="w-3 h-3 flex-shrink-0 text-purple-400"></i>
+                            <span id="label-selected-week" class="truncate">Semua Mgg</span>
+                            <i data-lucide="chevron-down" class="w-3 h-3 flex-shrink-0 opacity-60"></i>
+                        </button>
+                        <button onclick="openMonthSelectorModal()" id="btn-month-select" class="text-[11px] px-2 py-2 rounded-xl font-semibold transition bg-purple-600 text-white flex items-center justify-center gap-1 truncate shadow-md">
+                            <i data-lucide="calendar-days" class="w-3 h-3 flex-shrink-0"></i>
+                            <span id="label-selected-month" class="truncate">Oktober</span>
+                            <i data-lucide="chevron-down" class="w-3 h-3 flex-shrink-0 opacity-60"></i>
+                        </button>
+                        <button onclick="openYearSelectorModal()" id="btn-year-select" class="text-[11px] px-2 py-2 rounded-xl font-semibold transition bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center gap-1 truncate border border-white/5">
+                            <i data-lucide="calendar-range" class="w-3 h-3 flex-shrink-0 text-pink-400"></i>
+                            <span id="label-selected-year" class="truncate">2026</span>
+                            <i data-lucide="chevron-down" class="w-3 h-3 flex-shrink-0 opacity-60"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chart Container Card -->
+                <div class="glass-card-dark p-5 rounded-3xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-semibold text-slate-400" id="chart-period-title">Statistik Pengeluaran</span>
+                        <span class="text-xs text-purple-400 font-bold" id="period-total">Rp 0</span>
+                    </div>
+                    <div class="relative h-56 w-full flex justify-center items-center">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Category Breakdown Cards (Interactive Accordion) -->
+                <div>
+                    <h3 class="text-xs font-bold text-slate-200 mb-1 tracking-wide uppercase">Rincian Per Kategori</h3>
+                    <p class="text-[10px] text-slate-400 mb-3">Klik kotak kategori untuk melihat rincian pengeluaran & tanggalnya</p>
+                    <div id="category-breakdown" class="space-y-3">
+                        <!-- Dynamic Category Expandable Accordion items -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-budget" class="hidden space-y-6 transition-all duration-300">
+                
+                <!-- SECTION A: PLOTTING DANA KATEGORI -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-1.5">
+                                <i data-lucide="pie-chart" class="w-5 h-5 text-purple-400"></i> Plotting Dana Kategori
+                            </h2>
+                            <p class="text-xs text-slate-400">Pisahkan dana utama ke pos anggaran khusus</p>
+                        </div>
+                        <button onclick="openModal('plotting-modal')" class="glass-pill px-3 py-1.5 rounded-2xl text-xs font-bold text-purple-300 flex items-center gap-1 hover:bg-white/20 transition">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Tambah Plotting
+                        </button>
+                    </div>
+
+                    <!-- Plotted Fund Cards -->
+                    <div id="plotted-category-list" class="space-y-3">
+                        <!-- Dynamic Plotting Cards -->
+                    </div>
+                </div>
+
+                <hr class="border-white/10 my-4">
+
+                <!-- SECTION B: TARGET IMPIAN / TABUNGAN -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-1.5">
+                                <i data-lucide="target" class="w-5 h-5 text-pink-400"></i> Target Impian 🎯
+                            </h2>
+                            <p class="text-xs text-slate-400">Tabungan khusus barang yang ingin kamu beli</p>
+                        </div>
+                        <button onclick="openModal('savings-modal')" class="glass-pill px-3 py-1.5 rounded-2xl text-xs font-bold text-pink-300 flex items-center gap-1 hover:bg-white/20 transition">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Target Baru
+                        </button>
+                    </div>
+
+                    <!-- Savings Goal List -->
+                    <div id="savings-list" class="space-y-4">
+                        <!-- Dynamic Savings items -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="absolute bottom-4 left-4 right-4 h-16 glass-card rounded-full flex justify-between items-center px-3 z-20 border border-white/20 shadow-2xl">
+            <button onclick="switchTab('home')" id="nav-home" class="nav-btn flex-1 flex flex-col items-center justify-center gap-0.5 text-purple-400 transition active:scale-90">
+                <i data-lucide="home" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold">Utama</span>
+            </button>
+            <button onclick="switchTab('analytics')" id="nav-analytics" class="nav-btn flex-1 flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white transition active:scale-90">
+                <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold">Analisis</span>
+            </button>
+
+            <!-- Elevated Center Floating Action Button -->
+            <div class="relative flex justify-center items-center px-1 -mt-6">
+                <button onclick="quickAdd('🍔 Makanan & Jajan')" class="w-13 h-13 p-3.5 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 to-rose-400 flex items-center justify-center text-white shadow-xl shadow-purple-500/50 hover:scale-105 active:scale-95 transition-all border-2 border-white/40">
+                    <i data-lucide="plus" class="w-6 h-6 stroke-[2.5]"></i>
+                </button>
+            </div>
+
+            <button onclick="switchTab('budget')" id="nav-budget" class="nav-btn flex-1 flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white transition active:scale-90">
+                <i data-lucide="target" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold">Plotting</span>
+            </button>
+            <button onclick="openModal('profile-modal')" class="nav-btn flex-1 flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white transition active:scale-90">
+                <i data-lucide="user" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold">Profil</span>
+            </button>
+        </nav>
+
+        <!-- MODAL 1: ADD / EDIT TRANSACTION -->
+        <div id="transaction-modal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-md transition-opacity">
+            <div class="w-full max-w-md glass-modal rounded-t-[32px] sm:rounded-[32px] p-6 space-y-4 animate-in slide-in-from-bottom duration-300 border border-white/20 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2" id="modal-tx-title">
+                        <i data-lucide="receipt" class="w-5 h-5 text-purple-400"></i> Catat Transaksi Baru
+                    </h3>
+                    <button onclick="closeModal('transaction-modal')" class="p-1.5 rounded-full glass-pill hover:bg-white/20">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </button>
+                </div>
+
+                <!-- Type Selector (Pengeluaran / Pemasukan) -->
+                <div class="grid grid-cols-2 gap-2 glass-pill p-1 rounded-2xl">
+                    <button type="button" onclick="setTransactionType('expense')" id="type-expense" class="py-2 rounded-xl text-xs font-bold bg-rose-500/80 text-white transition shadow-md">Pengeluaran 💸</button>
+                    <button type="button" onclick="setTransactionType('income')" id="type-income" class="py-2 rounded-xl text-xs font-bold text-slate-400 transition">Pemasukan 💰</button>
+                </div>
+
+                <form id="transaction-form" onsubmit="handleSaveTransaction(event)" class="space-y-4">
+                    <input type="hidden" id="tx-edit-id" value="">
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Nominal (Rp)</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-3 text-sm font-bold text-slate-400">Rp</span>
+                            <input type="text" id="tx-amount" oninput="formatNumberInput(this)" placeholder="10.000" required class="w-full pl-11 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-sm font-bold text-white outline-none focus:border-purple-400 transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Kategori</label>
+                        <select id="tx-category" onchange="toggleCustomCategoryField(this.value)" required class="w-full px-4 py-2.5 bg-slate-800 border border-white/20 rounded-2xl text-xs font-semibold text-white outline-none focus:border-purple-400 transition">
+                            <option value="🍔 Makanan & Jajan">🍔 Makanan & Jajan</option>
+                            <option value="🛵 Transportasi">🛵 Transportasi</option>
+                            <option value="🎮 Hiburan & Game">🎮 Hiburan & Game</option>
+                            <option value="🛍️ Belanja & Kebutuhan">🛍️ Belanja & Kebutuhan</option>
+                            <option value="📚 Sekolah & Edukasi">📚 Sekolah & Edukasi</option>
+                            <option value="💰 Uang Saku Utama">💰 Uang Saku Utama / Gaji</option>
+                            <option value="🎁 Bonus & Lainnya">🎁 Bonus & Lainnya</option>
+                            <option value="__CUSTOM__">➕ Kategori Bebas / Tambah Baru...</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Category Fields (hidden by default) -->
+                    <div id="custom-category-group" class="hidden space-y-2 bg-slate-800/60 p-3 rounded-2xl border border-purple-500/30">
+                        <label class="block text-[11px] font-semibold text-purple-300">Nama & Ikon Kategori Bebas</label>
+                        <div id="tx-emoji-picker" class="grid grid-cols-8 gap-1.5 max-h-40 overflow-y-auto hide-scrollbar" role="group" aria-label="Pilih ikon kategori"></div>
+                        <p class="text-[10px] text-slate-400">Ketuk emoji di atas, atau ketik emoji pilihanmu sendiri di kotak kiri.</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="custom-cat-emoji" placeholder="🏷️" aria-label="Ikon kategori" autocomplete="off" class="w-12 text-center py-2 bg-white/10 border border-white/20 rounded-xl text-base outline-none">
+                            <input type="text" id="custom-cat-name" placeholder="Misal: Skincare, Tagihan" class="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-xs text-white outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Catatan / Keterangan</label>
+                        <input type="text" id="tx-note" placeholder="Contoh: Es Kopi Susu, Bensin V-Power" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs text-white outline-none focus:border-purple-400 transition">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-semibold text-slate-300">Tanggal Transaksi</label>
+                            <button type="button" onclick="setTxDateToToday()" class="text-[11px] font-bold text-blue-400 hover:text-blue-300 hover:underline">
+                                Hari Ini
+                            </button>
+                        </div>
+                        <input type="date" id="tx-date" required class="w-full px-4 py-2.5 bg-slate-800 border border-white/20 rounded-2xl text-xs text-white outline-none focus:border-purple-400 transition">
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white font-bold text-xs rounded-2xl shadow-lg shadow-purple-500/30 transition active:scale-98">
+                        Simpan Transaksi ✍️
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL: DAFTAR KATEGORI -->
+        <div id="categories-modal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-md">
+            <div class="w-full max-w-md glass-modal rounded-t-[32px] sm:rounded-[32px] p-6 space-y-4 border border-white/20 max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="layers" class="w-5 h-5 text-purple-400"></i> Daftar Kategori
+                    </h3>
+                    <button type="button" onclick="closeModal('categories-modal')" class="p-1.5 rounded-full glass-pill hover:bg-white/20" aria-label="Tutup">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </button>
+                </div>
+
+                <div id="category-list" class="space-y-2"></div>
+
+                <form onsubmit="addCustomCategory(event)" class="space-y-2 bg-slate-800/60 p-3 rounded-2xl border border-purple-500/30" novalidate>
+                    <label class="block text-[11px] font-semibold text-purple-300">Tambah Kategori Baru</label>
+                    <div id="cat-emoji-picker" class="grid grid-cols-8 gap-1.5 max-h-40 overflow-y-auto hide-scrollbar" role="group" aria-label="Pilih ikon kategori"></div>
+                    <p class="text-[10px] text-slate-400">Ketuk emoji di atas, atau ketik emoji pilihanmu sendiri di kotak kiri.</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="cat-new-emoji" placeholder="🏷️" aria-label="Ikon kategori" autocomplete="off" class="w-12 text-center py-2 bg-white/10 border border-white/20 rounded-xl text-base outline-none">
+                        <input type="text" id="cat-new-name" maxlength="24" placeholder="Misal: Skincare, Tagihan" aria-label="Nama kategori" class="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-xs text-white outline-none focus:border-purple-400">
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold text-xs rounded-2xl shadow-lg shadow-purple-500/30 transition active:scale-98">Simpan Kategori ✨</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL 2: PLOTTING DANA KATEGORI -->
+        <div id="plotting-modal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-md">
+            <div class="w-full max-w-md glass-modal rounded-t-[32px] sm:rounded-[32px] p-6 space-y-4 border border-white/20">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="layers" class="w-5 h-5 text-purple-400"></i> Buat Plotting Dana Kategori
+                    </h3>
+                    <button onclick="closeModal('plotting-modal')" class="p-1.5 rounded-full glass-pill hover:bg-white/20">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </button>
+                </div>
+
+                <form onsubmit="handleSavePlotting(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Pilih Kategori Pos Dana</label>
+                        <select id="plotting-category-select" required class="w-full px-4 py-2.5 bg-slate-800 border border-white/20 rounded-2xl text-xs font-semibold text-white outline-none focus:border-purple-400">
+                            <option value="🍔 Makanan & Jajan">🍔 Makanan & Jajan</option>
+                            <option value="🛵 Transportasi">🛵 Transportasi</option>
+                            <option value="🎮 Hiburan & Game">🎮 Hiburan & Game</option>
+                            <option value="🛍️ Belanja & Kebutuhan">🛍️ Belanja & Kebutuhan</option>
+                            <option value="📚 Sekolah & Edukasi">📚 Sekolah & Edukasi</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Alokasi Dana Plotting (Rp)</label>
+                        <input type="text" id="plotting-amount" oninput="formatNumberInput(this)" placeholder="500.000" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
+                        <p class="text-[10px] text-slate-400 mt-1">Dana ini akan dipisahkan dari Dana Utama.</p>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white font-bold text-xs rounded-2xl shadow-lg transition">
+                        Simpan Plotting 🎯
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL 3: MONTH POPUP SELECTOR -->
+        <div id="month-selector-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md">
+            <div class="w-full max-w-xs glass-modal rounded-[28px] p-5 space-y-4 border border-white/20">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider">Pilih Bulan</h3>
+                    <button onclick="closeModal('month-selector-modal')" class="p-1 rounded-full glass-pill hover:bg-white/20">
+                        <i data-lucide="x" class="w-4 h-4 text-slate-400"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-3 gap-2" id="months-grid-container">
+                    <!-- 12 Months Buttons -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 4: YEAR POPUP SELECTOR -->
+        <div id="year-selector-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md">
+            <div class="w-full max-w-xs glass-modal rounded-[28px] p-5 space-y-4 border border-white/20">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider">Pilih Tahun</h3>
+                    <button onclick="closeModal('year-selector-modal')" class="p-1 rounded-full glass-pill hover:bg-white/20">
+                        <i data-lucide="x" class="w-4 h-4 text-slate-400"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-3 gap-2" id="years-grid-container">
+                    <!-- Years Buttons -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 5: WEEK POPUP SELECTOR -->
+        <div id="week-selector-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md">
+            <div class="w-full max-w-xs glass-modal rounded-[28px] p-5 space-y-4 border border-white/20">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider">Pilih Minggu</h3>
+                    <button onclick="closeModal('week-selector-modal')" class="p-1 rounded-full glass-pill hover:bg-white/20">
+                        <i data-lucide="x" class="w-4 h-4 text-slate-400"></i>
+                    </button>
+                </div>
+                <div class="space-y-2" id="weeks-list-container">
+                    <!-- Weeks Buttons -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 6: ADD SAVINGS GOAL -->
+        <div id="savings-modal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-md">
+            <div class="w-full max-w-md glass-modal rounded-t-[32px] sm:rounded-[32px] p-6 space-y-4 border border-white/20">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="target" class="w-5 h-5 text-pink-400"></i> Buat Target Impian Baru
+                    </h3>
+                    <button onclick="closeModal('savings-modal')" class="p-1.5 rounded-full glass-pill hover:bg-white/20">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </button>
+                </div>
+
+                <form onsubmit="handleSaveSavingsGoal(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Barang / Impian</label>
+                        <input type="text" id="goal-title" placeholder="Contoh: Tiket Konser, Sepatu Baru" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs text-white outline-none focus:border-purple-400">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Harga Target (Rp)</label>
+                        <input type="text" id="goal-target" oninput="formatNumberInput(this)" placeholder="600.000" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Tabungan Awal (Opsional)</label>
+                        <input type="text" id="goal-initial" oninput="formatNumberInput(this)" placeholder="100.000" class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs text-white outline-none focus:border-purple-400">
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold text-xs rounded-2xl shadow-lg transition">
+                        Simpan Target 🚀
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL 7: ADD MONEY TO SAVINGS -->
+        <div id="deposit-modal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-md">
+            <div class="w-full max-w-md glass-modal rounded-t-[32px] sm:rounded-[32px] p-6 space-y-4 border border-white/20">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="piggy-bank" class="w-5 h-5 text-emerald-400"></i> Tambah Tabungan
+                    </h3>
+                    <button onclick="closeModal('deposit-modal')" class="p-1.5 rounded-full glass-pill hover:bg-white/20">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </button>
+                </div>
+
+                <p class="text-xs text-slate-300" id="deposit-goal-name">Target: -</p>
+
+                <form onsubmit="handleSaveDeposit(event)" class="space-y-4">
+                    <input type="hidden" id="deposit-goal-id">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Nominal Tambahan (Rp)</label>
+                        <input type="text" id="deposit-amount" oninput="formatNumberInput(this)" placeholder="50.000" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-sm font-bold text-white outline-none focus:border-emerald-400">
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold text-xs rounded-2xl shadow-lg transition">
+                        Tabung Sekarang 💰
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- MODAL 8: PROFILE & SETTINGS -->
+        <div id="profile-modal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-md">
+            <div class="w-full max-w-md glass-modal rounded-t-[32px] sm:rounded-[32px] p-6 space-y-5 border border-white/20 max-h-[85vh] overflow-y-auto">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="user" class="w-5 h-5 text-purple-400"></i> Pengaturan Profil & iWallet
+                    </h3>
+                    <button onclick="closeModal('profile-modal')" class="p-1.5 rounded-full glass-pill hover:bg-white/20">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </button>
+                </div>
+
+                <div class="glass-pill rounded-2xl p-3 flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-purple-300"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p id="profile-account-email" class="text-xs font-bold text-white truncate"></p>
+                        <p id="profile-account-provider" class="text-[10px] text-slate-400"></p>
+                    </div>
+                    <button type="button" onclick="logoutUser()" class="px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-[11px] font-bold text-slate-200 hover:bg-white/20 flex items-center gap-1 transition active:scale-95">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Keluar
+                    </button>
+                </div>
+
+                <div id="install-card" class="glass-pill rounded-2xl p-3" style="display:none;">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center flex-shrink-0 text-base">📲</div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs font-bold text-white">Pasang di HP</p>
+                            <p id="install-hint" class="text-[10px] text-slate-400 leading-snug"></p>
+                        </div>
+                        <button type="button" id="install-btn" onclick="installApp()" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-[11px] font-bold text-white transition active:scale-95" style="display:none;">Pasang</button>
+                    </div>
+                </div>
+
+                <form onsubmit="handleSaveProfile(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Kamu</label>
+                        <input type="text" id="profile-name-input" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Foto Profil / Avatar</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" id="profile-avatar-input" class="flex-1 px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs text-white outline-none focus:border-purple-400" placeholder="URL foto (kosongkan untuk tetap memakai yang sekarang)">
+                        </div>
+                        <div id="preset-avatars" class="flex gap-2 overflow-x-auto pb-1" role="group" aria-label="Avatar bawaan"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Batas Anggaran Bulanan (Rp)</label>
+                        <input type="text" id="profile-budget-input" oninput="formatNumberInput(this)" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-2xl transition">
+                        Simpan Profil ✨
+                    </button>
+                </form>
+
+                <hr class="border-white/10 my-2">
+
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-300">Ekspor & Data Spreadsheet</h4>
+                    <button onclick="exportToSpreadsheetCSV()" class="w-full py-2.5 glass-pill hover:bg-white/20 text-emerald-300 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 border border-emerald-500/30">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Unduh CSV Laporan Spreadsheet
+                    </button>
+                    <button onclick="resetAllAppData()" class="w-full py-2.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold text-xs rounded-2xl border border-rose-500/30">
+                        🔥 Reset Seluruh Data Aplikasi
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL 9: CUSTOM GLASS CONFIRMATION MODAL (Replaces alert/confirm) -->
+        <div id="confirm-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md">
+            <div class="w-full max-w-xs glass-modal rounded-[28px] p-5 space-y-4 border border-white/20 text-center">
+                <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 mx-auto flex items-center justify-center text-xl">
+                    ⚠️
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white" id="confirm-modal-title">Konfirmasi Action</h3>
+                    <p class="text-xs text-slate-300 mt-1 leading-relaxed" id="confirm-modal-msg">Apakah kamu yakin ingin melanjutkan?</p>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <button type="button" onclick="closeModal('confirm-modal')" class="py-2.5 rounded-xl glass-pill text-xs font-semibold text-slate-300 hover:bg-white/20">Batal</button>
+                    <button type="button" id="confirm-modal-action-btn" class="py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white shadow-lg">Ya, Lanjutkan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ LOGIN SCREEN ============ -->
+        <div id="login-screen" class="absolute inset-0 z-40 overflow-y-auto hide-scrollbar">
+            <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute -top-16 -left-10 w-64 h-64 bg-purple-600 rounded-full filter blur-[90px] opacity-50 animate-blob"></div>
+                <div class="absolute top-1/2 -right-16 w-64 h-64 bg-blue-600 rounded-full filter blur-[100px] opacity-35 animate-blob animation-delay-2000"></div>
+                <div class="absolute -bottom-20 left-1/4 w-72 h-72 bg-pink-600 rounded-full filter blur-[110px] opacity-40 animate-blob animation-delay-4000"></div>
+            </div>
+
+            <div class="relative z-10 min-h-full flex flex-col justify-center px-6 py-10 gap-7">
+
+                <!-- Logo + Judul -->
+                <div class="text-center">
+                    <div class="mx-auto w-[104px] h-[104px]" style="filter: drop-shadow(0 18px 30px rgba(168, 85, 247, 0.5));">
+                        <svg id="login-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="104" height="104" role="img" aria-label="Logo iWallet">
+                            <defs>
+                                <linearGradient id="lg-bg" gradientUnits="userSpaceOnUse" x1="8" y1="0" x2="112" y2="120">
+                                    <stop offset="0" stop-color="#8B5CF6"/>
+                                    <stop offset="0.55" stop-color="#D946EF"/>
+                                    <stop offset="1" stop-color="#3B82F6"/>
+                                </linearGradient>
+                                <linearGradient id="lg-gloss" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
+                                    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+                                </linearGradient>
+                                <linearGradient id="lg-glass" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#fff" stop-opacity="0.7"/>
+                                    <stop offset="1" stop-color="#fff" stop-opacity="0.22"/>
+                                </linearGradient>
+                                <linearGradient id="lg-coin" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#FEF3C7"/>
+                                    <stop offset="0.5" stop-color="#FCD34D"/>
+                                    <stop offset="1" stop-color="#F59E0B"/>
+                                </linearGradient>
+                                <clipPath id="lg-clip"><rect width="120" height="120" rx="28"/></clipPath>
+                            </defs>
+                            <!-- Squircle ikon iOS -->
+                            <rect width="120" height="120" rx="28" fill="url(#lg-bg)"/>
+                            <g clip-path="url(#lg-clip)">
+                                <circle cx="28" cy="18" r="38" fill="#fff" opacity="0.16"/>
+                                <rect width="120" height="62" fill="url(#lg-gloss)" opacity="0.45"/>
+                            </g>
+                            <rect x="0.75" y="0.75" width="118.5" height="118.5" rx="27.25" fill="none" stroke="#fff" stroke-opacity="0.45" stroke-width="1.5"/>
+                            <!-- Bayangan dompet -->
+                            <ellipse cx="60" cy="101" rx="29" ry="4" fill="#1E1B4B" opacity="0.28"/>
+                            <!-- Tutup dompet (belakang) -->
+                            <path d="M26 54 Q26 43 37 41 L81 34 Q93 32 93 43 V56 H26 Z" fill="#fff" fill-opacity="0.34" stroke="#fff" stroke-opacity="0.5" stroke-width="1.2"/>
+                            <!-- Koin jatuh ke dompet -->
+                            <circle cx="58" cy="40" r="12.5" fill="url(#lg-coin)"/>
+                            <circle cx="58" cy="40" r="8.2" fill="none" stroke="#B45309" stroke-opacity="0.4" stroke-width="1.6"/>
+                            <path d="M51.5 36.5 A8 8 0 0 1 58 32.6" fill="none" stroke="#fff" stroke-opacity="0.85" stroke-width="1.8" stroke-linecap="round"/>
+                            <!-- Badan dompet kaca -->
+                            <rect x="24" y="49" width="72" height="46" rx="14" fill="url(#lg-glass)" stroke="#fff" stroke-opacity="0.75" stroke-width="1.5"/>
+                            <path d="M35 56 H79" stroke="#fff" stroke-opacity="0.55" stroke-width="1.6" stroke-linecap="round"/>
+                            <!-- Kancing dompet -->
+                            <rect x="71" y="62" width="30" height="20" rx="10" fill="#fff" fill-opacity="0.4" stroke="#fff" stroke-opacity="0.8" stroke-width="1.3"/>
+                            <circle cx="82" cy="72" r="3.4" fill="#fff"/>
+                            <!-- Kilau -->
+                            <path d="M95 14 l2.3 6.2 L103.5 22.5 l-6.2 2.3 L95 31 l-2.3-6.2 L86.5 22.5 l6.2-2.3 z" fill="#fff" fill-opacity="0.92"/>
+                        </svg>
+                    </div>
+                    <h1 class="mt-5 text-[2rem] leading-none font-extrabold tracking-tight text-white">iWallet</h1>
+                    <p class="mt-2 text-[13px] text-slate-300/85 leading-relaxed max-w-[250px] mx-auto">Catat jajan, atur uang saku, dan capai target tabunganmu.</p>
+                </div>
+
+                <!-- Kartu Login -->
+                <div class="login-card rounded-[32px] p-5">
+
+                    <!-- Langkah 1: Email -->
+                    <div id="login-step-email" class="space-y-4">
+                        <form onsubmit="submitEmail(event)" class="space-y-3" novalidate>
+                            <div>
+                                <label for="login-email" class="block text-xs font-semibold text-slate-200 mb-1.5">Email</label>
+                                <div class="relative">
+                                    <i data-lucide="mail" class="w-4 h-4 text-slate-300/70 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                                    <input type="email" id="login-email" class="login-input" placeholder="nama@email.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false">
+                                </div>
+                                <p id="login-email-error" class="hidden text-[11px] text-rose-300 mt-1.5"></p>
+                            </div>
+                            <button type="submit" class="login-btn-primary w-full py-3.5 rounded-2xl text-white text-sm font-bold active:scale-[0.98] transition">
+                                Kirim Kode ke Email
+                            </button>
+                        </form>
+
+                        <div class="flex items-center gap-3">
+                            <div class="h-px flex-1 bg-white/15"></div>
+                            <span class="text-[11px] text-slate-300/70">atau lanjutkan dengan</span>
+                            <div class="h-px flex-1 bg-white/15"></div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" id="btn-google" onclick="openProvider('google')" class="login-btn-glass py-3 rounded-2xl text-white text-xs font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition">
+                                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                                    <path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.46a5.52 5.52 0 0 1-2.4 3.62v3h3.88c2.27-2.09 3.58-5.17 3.58-8.81z"/>
+                                    <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.91l-3.88-3c-1.07.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.71-4.94H1.28v3.1A12 12 0 0 0 12 24z"/>
+                                    <path fill="#FBBC05" d="M5.29 14.3A7.2 7.2 0 0 1 4.91 12c0-.8.14-1.57.38-2.3v-3.1H1.28A12 12 0 0 0 0 12c0 1.94.46 3.77 1.28 5.4l4.01-3.1z"/>
+                                    <path fill="#EA4335" d="M12 4.75c1.76 0 3.34.61 4.58 1.8l3.43-3.43C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.6l4.01 3.1C6.23 6.86 8.88 4.75 12 4.75z"/>
+                                </svg>
+                                Google
+                            </button>
+                            <button type="button" id="btn-apple" onclick="openProvider('apple')" class="login-btn-glass py-3 rounded-2xl text-white text-xs font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff" aria-hidden="true">
+                                    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/>
+                                </svg>
+                                Apple
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Langkah 2: Kode -->
+                    <div id="login-step-code" class="hidden space-y-4">
+                        <button type="button" onclick="backToEmailStep()" class="flex items-center gap-1 text-xs font-semibold text-slate-300 hover:text-white transition">
+                            <i data-lucide="chevron-left" class="w-4 h-4"></i> Ganti email
+                        </button>
+                        <div>
+                            <h3 class="text-base font-bold text-white">Masukkan kode</h3>
+                            <p class="text-xs text-slate-300/85 mt-1 leading-relaxed">Kode 6 digit dikirim ke <span id="login-code-email" class="font-bold text-white break-all"></span></p>
+                        </div>
+                        <form onsubmit="verifyCode(event)" class="space-y-3" novalidate>
+                            <div id="otp-boxes" class="flex gap-2 justify-between">
+                                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1">
+                                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2">
+                                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3">
+                                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4">
+                                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5">
+                                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6">
+                            </div>
+                            <p id="login-code-error" class="hidden text-[11px] text-rose-300"></p>
+                            <button type="submit" class="login-btn-primary w-full py-3.5 rounded-2xl text-white text-sm font-bold active:scale-[0.98] transition">
+                                Masuk ke iWallet
+                            </button>
+                        </form>
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-slate-400">Tidak menerima kode?</span>
+                            <button type="button" id="btn-resend" onclick="resendCode()" class="font-bold text-purple-300 hover:text-purple-200 disabled:text-slate-500 transition" disabled>Kirim ulang</button>
+                        </div>
+                        <p class="text-[10px] text-slate-400 leading-relaxed">Mode demo: belum terhubung ke server email, jadi kode tampil sebagai notifikasi di bagian atas layar.</p>
+                    </div>
+                </div>
+
+                <p class="text-center text-[11px] text-slate-400 leading-relaxed px-4">Datamu tersimpan di perangkat ini dan tetap utuh meski aplikasi ditutup.</p>
+            </div>
+
+            <!-- Sheet Google / Apple -->
+            <div id="provider-sheet" class="absolute inset-0 z-20 items-end bg-slate-950/60 backdrop-blur-sm" style="display:none;" onclick="if(event.target===this) closeProvider()">
+                <form onsubmit="submitProvider(event)" class="login-sheet w-full rounded-t-[32px] p-6 pb-8 space-y-4" novalidate>
+                    <div class="w-10 h-1.5 rounded-full bg-white/25 mx-auto"></div>
+                    <div class="flex items-center gap-3">
+                        <div id="provider-icon" class="w-11 h-11 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center flex-shrink-0 [&>svg]:w-6 [&>svg]:h-6"></div>
+                        <div>
+                            <h3 id="provider-title" class="text-base font-bold text-white">Masuk dengan Google</h3>
+                            <p class="text-[11px] text-slate-300/80">Pilih akun untuk lanjut ke iWallet</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="provider-email" class="block text-xs font-semibold text-slate-200 mb-1.5">Email akun</label>
+                        <div class="relative">
+                            <i data-lucide="at-sign" class="w-4 h-4 text-slate-300/70 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                            <input type="email" id="provider-email" class="login-input" placeholder="nama@email.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false">
+                        </div>
+                        <p id="provider-error" class="hidden text-[11px] text-rose-300 mt-1.5"></p>
+                    </div>
+                    <label id="provider-hide-wrap" class="items-center gap-2 text-xs text-slate-200 cursor-pointer" style="display:none;">
+                        <input type="checkbox" id="provider-hide" class="w-4 h-4 accent-purple-500">
+                        Sembunyikan email saya
+                    </label>
+                    <p class="text-[10px] text-slate-400 leading-relaxed">Mode demo: akun belum diverifikasi ke server Google atau Apple.</p>
+                    <div class="grid grid-cols-2 gap-3 pt-1">
+                        <button type="button" onclick="closeProvider()" class="login-btn-glass py-3 rounded-2xl text-xs font-semibold text-slate-200 transition">Batal</button>
+                        <button type="submit" class="login-btn-primary py-3 rounded-2xl text-xs font-bold text-white active:scale-[0.98] transition">Lanjutkan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+            /* Sembunyikan login lebih awal bila sesi tersimpan, agar tidak berkedip */
+            try { if (localStorage.getItem('iwallet_session')) document.getElementById('login-screen').classList.add('login-hidden'); } catch (e) {}
+        </script>
+
+        <!-- Notifikasi kode (gaya banner iOS) -->
+        <div id="otp-banner" class="absolute top-3 left-3 right-3 z-[60] rounded-[22px] p-3 flex items-center gap-3 cursor-pointer" onclick="fillOtpFromBanner()" role="status">
+            <div class="w-10 h-10 rounded-[12px] bg-gradient-to-br from-purple-500 via-fuchsia-500 to-blue-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                <i data-lucide="wallet" class="w-5 h-5 text-white"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+                <div class="flex justify-between items-center">
+                    <span class="text-[11px] font-bold text-white">iWallet</span>
+                    <span class="text-[10px] text-slate-300/80">sekarang</span>
+                </div>
+                <p class="text-xs text-slate-100 leading-snug">Kode verifikasi kamu: <span id="otp-banner-code" class="font-extrabold tracking-widest"></span></p>
+                <p class="text-[10px] text-slate-300/75">Berlaku 5 menit. Ketuk untuk mengisi otomatis.</p>
+            </div>
+        </div>
+
+        <!-- Toast Banner -->
+        <div id="toast-banner" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-800/90 text-white border border-white/20 px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 z-50 transform translate-y-10 opacity-0 transition-all pointer-events-none text-xs max-w-xs text-center">
+            <span id="toast-icon">✨</span>
+            <span id="toast-msg">Notifikasi</span>
+        </div>
+
+    </div>
+
+    <script>
+        /* Ikon: SVG inline bergaya Lucide (24x24, stroke 2). Tidak butuh library atau internet. */
+        const ICONS = {
+        "x": "<path d=\"M18 6 6 18\"/><path d=\"m6 6 12 12\"/>",
+        "trash-2": "<path d=\"M3 6h18\"/><path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\"/><path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\"/><line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\"/><line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\"/>",
+        "target": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"12\" r=\"6\"/><circle cx=\"12\" cy=\"12\" r=\"2\"/>",
+        "plus": "<path d=\"M5 12h14\"/><path d=\"M12 5v14\"/>",
+        "plus-circle": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M8 12h8\"/><path d=\"M12 8v8\"/>",
+        "chevron-down": "<path d=\"m6 9 6 6 6-6\"/>",
+        "chevron-up": "<path d=\"m18 15-6-6-6 6\"/>",
+        "chevron-right": "<path d=\"m9 18 6-6-6-6\"/>",
+        "chevron-left": "<path d=\"m15 18-6-6 6-6\"/>",
+        "wallet": "<path d=\"M21 12V7H5a2 2 0 0 1 0-4h14v4\"/><path d=\"M3 5v14a2 2 0 0 0 2 2h16v-5\"/><path d=\"M18 12a2 2 0 0 0 0 4h4v-4Z\"/>",
+        "user": "<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/>",
+        "pie-chart": "<path d=\"M21.21 15.89A10 10 0 1 1 8 2.83\"/><path d=\"M22 12A10 10 0 0 0 12 2v10z\"/>",
+        "layers": "<path d=\"m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z\"/><path d=\"m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65\"/><path d=\"m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65\"/>",
+        "sliders-horizontal": "<line x1=\"21\" x2=\"14\" y1=\"4\" y2=\"4\"/><line x1=\"10\" x2=\"3\" y1=\"4\" y2=\"4\"/><line x1=\"21\" x2=\"12\" y1=\"12\" y2=\"12\"/><line x1=\"8\" x2=\"3\" y1=\"12\" y2=\"12\"/><line x1=\"21\" x2=\"16\" y1=\"20\" y2=\"20\"/><line x1=\"12\" x2=\"3\" y1=\"20\" y2=\"20\"/><line x1=\"14\" x2=\"14\" y1=\"2\" y2=\"6\"/><line x1=\"8\" x2=\"8\" y1=\"10\" y2=\"14\"/><line x1=\"16\" x2=\"16\" y1=\"18\" y2=\"22\"/>",
+        "shield-check": "<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/><path d=\"m9 12 2 2 4-4\"/>",
+        "receipt": "<path d=\"M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z\"/><path d=\"M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8\"/><path d=\"M12 17.5v-11\"/>",
+        "piggy-bank": "<path d=\"M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z\"/><path d=\"M2 9v1c0 1.1.9 2 2 2h1\"/><path d=\"M16 11h.01\"/>",
+        "mail": "<rect width=\"20\" height=\"16\" x=\"2\" y=\"4\" rx=\"2\"/><path d=\"m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7\"/>",
+        "log-out": "<path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\"/><polyline points=\"16 17 21 12 16 7\"/><line x1=\"21\" x2=\"9\" y1=\"12\" y2=\"12\"/>",
+        "home": "<path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/><polyline points=\"9 22 9 12 15 12 15 22\"/>",
+        "file-spreadsheet": "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"M8 13h2\"/><path d=\"M14 13h2\"/><path d=\"M8 17h2\"/><path d=\"M14 17h2\"/>",
+        "edit-3": "<path d=\"M12 20h9\"/><path d=\"M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z\"/>",
+        "calendar": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M16 2v4\"/><path d=\"M8 2v4\"/><path d=\"M3 10h18\"/>",
+        "calendar-days": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M16 2v4\"/><path d=\"M8 2v4\"/><path d=\"M3 10h18\"/><path d=\"M8 14h.01\"/><path d=\"M12 14h.01\"/><path d=\"M16 14h.01\"/><path d=\"M8 18h.01\"/><path d=\"M12 18h.01\"/><path d=\"M16 18h.01\"/>",
+        "calendar-range": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M16 2v4\"/><path d=\"M3 10h18\"/><path d=\"M8 2v4\"/><path d=\"M17 14h-6\"/><path d=\"M13 18H7\"/><path d=\"M7 14h.01\"/><path d=\"M17 18h.01\"/>",
+        "bar-chart-3": "<path d=\"M3 3v18h18\"/><path d=\"M18 17V9\"/><path d=\"M13 17V5\"/><path d=\"M8 17v-3\"/>",
+        "at-sign": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8\"/>",
+        "arrow-up-right": "<path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/>",
+        "arrow-down-left": "<path d=\"M17 7 7 17\"/><path d=\"M17 17H7V7\"/>"
+};
+
+        function refreshIcons() {
+            document.querySelectorAll('i[data-lucide]').forEach(function (el) {
+                const name = el.getAttribute('data-lucide');
+                const body = ICONS[name];
+                if (!body) { console.warn('Ikon tidak dikenal:', name); return; }
+                const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" ' +
+                    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ' +
+                    'class="lucide lucide-' + name + ' ' + (el.getAttribute('class') || '') + '">' + body + '</svg>';
+                const t = document.createElement('template');
+                t.innerHTML = svg;
+                el.replaceWith(t.content.firstChild);
+            });
+        }
+
+        // Month names array for mapping
+        const monthNames = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni", 
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
+        // Application State
+        let state = {
+            profile: {
+                name: 'Alex',
+                avatar: '',
+                monthlyBudget: 1000000
+            },
+            transactions: [
+                { id: 'tx_1', type: 'income', amount: 1500000, category: '💰 Uang Saku Utama', note: 'Uang Saku Bulanan', date: getISOFormatDate(0) },
+                { id: 'tx_2', type: 'expense', amount: 35000, category: '🍔 Makanan & Jajan', note: 'Makan Siang & Es Kopi', date: getISOFormatDate(0) },
+                { id: 'tx_3', type: 'expense', amount: 15000, category: '🛵 Transportasi', note: 'Ojek Online', date: getISOFormatDate(-1) },
+                { id: 'tx_4', type: 'expense', amount: 50000, category: '🎮 Hiburan & Game', note: 'Voucher Game', date: getISOFormatDate(-2) }
+            ],
+            plottedBudgets: {
+                '🍔 Makanan & Jajan': 400000,
+                '🛵 Transportasi': 200000
+            },
+            savingsGoals: [
+                { id: 'goal_1', title: 'Sepatu Sneaker Baru', target: 600000, current: 250000 }
+            ],
+            customCategories: []
+        };
+
+        let currentTxType = 'expense';
+        
+        // Dynamically initialize current date selection
+        const initialDateObj = new Date();
+        let selectedYear = initialDateObj.getFullYear();
+        let selectedMonth = initialDateObj.getMonth(); // 0-indexed
+        let selectedWeek = 'all'; // 'all', 1, 2, 3, 4
+        let myChart = null;
+        let expandedHomeCategories = {};
+        let expandedAnalyticsCategories = {};
+        let hasAlertedBoros = false;
+        let pendingConfirmAction = null;
+
+        // Robust ISO date parser ignoring client timezone offset
+        function parseIsoDate(dateStr) {
+            if (!dateStr) {
+                const d = new Date();
+                return { year: d.getFullYear(), month: d.getMonth(), day: d.getDate() };
+            }
+            const parts = dateStr.split('-');
+            return {
+                year: parseInt(parts[0], 10),
+                month: parseInt(parts[1], 10) - 1, // 0-indexed month
+                day: parseInt(parts[2], 10)
+            };
+        }
+
+        function initApp() {
+            setFaviconFromLogo();
+            initEmojiPickers();
+            bindOtpBoxes();
+            session = readSession();
+            if (session) {
+                enterApp(false);
+            } else {
+                byId('login-screen').classList.remove('login-hidden');
+            }
+            refreshIcons();
+        }
+        // Jalankan segera setelah HTML siap (tidak menunggu CDN/gambar selesai dimuat)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+        // Setelah semua sumber dimuat (mis. ikon dari CDN cadangan), render ulang ikon
+        window.addEventListener('load', function() { refreshIcons(); });
+
+        function renderAllViews() {
+            renderProfile();
+            renderQuickCategories();
+            renderTransactions();
+            renderPlottedCategories();
+            renderSavingsGoals();
+            renderDashboardSummary();
+            renderAnalytics();
+            refreshIcons();
+        }
+
+
+        function formatRupiah(num) {
+            return new Intl.NumberFormat('id-ID').format(num || 0);
+        }
+
+        function formatNumberInput(input) {
+            let val = input.value.replace(/\D/g, '');
+            if (!val) {
+                input.value = '';
+                return;
+            }
+            input.value = new Intl.NumberFormat('id-ID').format(parseInt(val, 10));
+        }
+
+        function parseFormattedNumber(valStr) {
+            if (!valStr) return 0;
+            const clean = valStr.toString().replace(/\D/g, '');
+            return parseInt(clean, 10) || 0;
+        }
+
+        function getTodayISODate() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function getISOFormatDate(offsetDays = 0) {
+            const d = new Date();
+            d.setDate(d.getDate() + offsetDays);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function setTxDateToToday() {
+            document.getElementById('tx-date').value = getTodayISODate();
+        }
+
+        function showToast(msg, icon = '✨') {
+            const toast = document.getElementById('toast-banner');
+            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').innerText = icon;
+
+            toast.classList.remove('translate-y-10', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0', 'pointer-events-none');
+            }, 3500);
+        }
+
+        function showConfirmModal(title, msg, onConfirm) {
+            document.getElementById('confirm-modal-title').innerText = title;
+            document.getElementById('confirm-modal-msg').innerText = msg;
+            pendingConfirmAction = onConfirm;
+            const btn = document.getElementById('confirm-modal-action-btn');
+            btn.onclick = function() {
+                if (pendingConfirmAction) pendingConfirmAction();
+                closeModal('confirm-modal');
+            };
+            openModal('confirm-modal');
+        }
+
+        function switchTab(tabName) {
+            ['home', 'analytics', 'budget'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`nav-${t}`);
+                if (btn) {
+                    btn.className = "nav-btn flex-1 flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-white transition active:scale-90";
+                }
+            });
+
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabName}`);
+            if (activeBtn) {
+                activeBtn.className = "nav-btn flex-1 flex flex-col items-center justify-center gap-0.5 text-purple-400 transition active:scale-90";
+            }
+
+            if (tabName === 'analytics') {
+                renderAnalytics();
+            }
+            currentTab = tabName;
+            saveUi();
+            refreshIcons();
+        }
+
+        function openModal(modalId) {
+            if (modalId === 'profile-modal') {
+                document.getElementById('profile-name-input').value = state.profile.name;
+                document.getElementById('profile-avatar-input').value = String(state.profile.avatar || '').startsWith('data:') ? '' : state.profile.avatar;
+                pendingAvatar = '';
+                renderPresetAvatars();
+                document.getElementById('profile-budget-input').value = formatRupiah(state.profile.monthlyBudget);
+            }
+            document.getElementById(modalId).classList.remove('hidden');
+            refreshIcons();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        /* Avatar bawaan: digambar sebagai SVG, jadi tidak butuh internet */
+        const PRESET_AVATARS = [
+            { emoji: '😎', a: '#8B5CF6', b: '#EC4899' },
+            { emoji: '🦊', a: '#F59E0B', b: '#EF4444' },
+            { emoji: '🐼', a: '#10B981', b: '#3B82F6' },
+            { emoji: '🚀', a: '#6366F1', b: '#06B6D4' }
+        ].map(function (x) {
+            const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'>" +
+                "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='" + x.a + "'/><stop offset='1' stop-color='" + x.b + "'/></linearGradient></defs>" +
+                "<rect width='150' height='150' fill='url(#g)'/>" +
+                "<text x='75' y='80' text-anchor='middle' dominant-baseline='central' font-size='78'>" + x.emoji + "</text></svg>";
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        });
+        let pendingAvatar = '';
+
+        function renderPresetAvatars() {
+            const box = document.getElementById('preset-avatars');
+            if (!box) return;
+            box.innerHTML = '';
+            PRESET_AVATARS.forEach(function (url, i) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'w-9 h-9 rounded-xl border overflow-hidden flex-shrink-0 transition ' +
+                    (pendingAvatar === url ? 'border-purple-400 ring-2 ring-purple-400/60' : 'border-white/20');
+                btn.setAttribute('aria-label', 'Pilih avatar ' + (i + 1));
+                btn.onclick = function () { selectPresetAvatar(url); };
+                const img = document.createElement('img');
+                img.src = url; img.alt = ''; img.className = 'w-full h-full object-cover';
+                btn.appendChild(img);
+                box.appendChild(btn);
+            });
+        }
+
+        function selectPresetAvatar(url) {
+            // Isian URL dikosongkan; avatar bawaan dipakai saat profil disimpan
+            pendingAvatar = url;
+            document.getElementById('profile-avatar-input').value = '';
+            renderPresetAvatars();
+        }
+
+        function setTransactionType(type) {
+            currentTxType = type;
+            const btnExp = document.getElementById('type-expense');
+            const btnInc = document.getElementById('type-income');
+
+            if (type === 'expense') {
+                btnExp.className = "py-2 rounded-xl text-xs font-bold bg-rose-500/80 text-white transition shadow-md";
+                btnInc.className = "py-2 rounded-xl text-xs font-bold text-slate-400 transition";
+            } else {
+                btnInc.className = "py-2 rounded-xl text-xs font-bold bg-emerald-500/80 text-white transition shadow-md";
+                btnExp.className = "py-2 rounded-xl text-xs font-bold text-slate-400 transition";
+            }
+        }
+
+        function toggleCustomCategoryField(val) {
+            const group = document.getElementById('custom-category-group');
+            if (val === '__CUSTOM__') {
+                group.classList.remove('hidden');
+            } else {
+                group.classList.add('hidden');
+            }
+        }
+
+        function renderQuickCategories() {
+            renderCategoryOptions();
+            const container = document.getElementById('quick-categories-container');
+            const baseCategories = [
+                '🍔 Makanan & Jajan',
+                '🛵 Transportasi',
+                '🎮 Hiburan & Game',
+                '🛍️ Belanja & Kebutuhan',
+                '📚 Sekolah & Edukasi'
+            ];
+
+            const allCats = [...new Set([...baseCategories, ...state.customCategories])];
+            container.innerHTML = '';
+
+            allCats.forEach(cat => {
+                const parts = cat.split(' ');
+                const icon = parts[0] || '✨';
+                const name = parts.slice(1).join(' ') || cat;
+
+                const btn = document.createElement('button');
+                btn.onclick = () => quickAdd(cat);
+                btn.className = "flex-shrink-0 glass-pill px-3.5 py-2 rounded-2xl flex items-center gap-2 hover:bg-white/20 transition active:scale-95";
+                btn.innerHTML = `
+                    <span class="text-base">${icon}</span>
+                    <span class="text-xs font-semibold">${escapeHtml(name)}</span>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function quickAdd(catName) {
+            setTransactionType('expense');
+            document.getElementById('tx-edit-id').value = '';
+            document.getElementById('modal-tx-title').innerText = 'Catat Transaksi Baru';
+            
+            const select = document.getElementById('tx-category');
+            if (![...select.options].some(o => o.value === catName)) {
+                const opt = document.createElement('option');
+                opt.value = catName;
+                opt.innerText = catName;
+                select.appendChild(opt);
+            }
+            select.value = catName;
+            toggleCustomCategoryField(catName);
+            openModal('transaction-modal');
+        }
+
+        function handleSaveTransaction(e) {
+            e.preventDefault();
+
+            const editId = document.getElementById('tx-edit-id').value;
+            const amount = parseFormattedNumber(document.getElementById('tx-amount').value);
+            let category = document.getElementById('tx-category').value;
+            const note = document.getElementById('tx-note').value.trim();
+            const date = document.getElementById('tx-date').value;
+
+            if (category === '__CUSTOM__') {
+                const customEmoji = firstGrapheme(document.getElementById('custom-cat-emoji').value) || '🏷️';
+                const customName = document.getElementById('custom-cat-name').value.trim();
+                if (!customName) {
+                    showToast('Isi nama kategori custom kamu!', '⚠️');
+                    return;
+                }
+                category = `${customEmoji} ${customName}`;
+                if (!state.customCategories.includes(category)) {
+                    state.customCategories.push(category);
+                }
+            }
+
+            if (!amount || amount <= 0) {
+                showToast('Masukkan nominal yang valid!', '⚠️');
+                return;
+            }
+
+            if (editId) {
+                // Edit existing transaction
+                const idx = state.transactions.findIndex(t => t.id === editId);
+                if (idx !== -1) {
+                    state.transactions[idx] = { id: editId, type: currentTxType, amount, category, note, date };
+                }
+            } else {
+                // New transaction
+                const newTx = {
+                    id: 'tx_' + Date.now(),
+                    type: currentTxType,
+                    amount,
+                    category,
+                    note,
+                    date
+                };
+                state.transactions.unshift(newTx);
+            }
+
+            saveToLocalStorage();
+
+            // Check if expense in a plotted category exceeds plotting limit
+            if (currentTxType === 'expense' && state.plottedBudgets[category]) {
+                const plottedTarget = state.plottedBudgets[category];
+                const totalSpentInCat = state.transactions
+                    .filter(t => t.type === 'expense' && t.category === category)
+                    .reduce((sum, t) => sum + t.amount, 0);
+
+                if (totalSpentInCat > plottedTarget) {
+                    showToast(`⚠️ Pengeluaran ${category} melebihi target plotting!`, '🚨');
+                } else {
+                    showToast(`Transaksi Rp ${formatRupiah(amount)} berhasil disimpan!`, '🎉');
+                }
+            } else {
+                showToast(`Transaksi Rp ${formatRupiah(amount)} berhasil disimpan!`, '🎉');
+            }
+
+            // Reset form
+            document.getElementById('tx-edit-id').value = '';
+            document.getElementById('tx-amount').value = '';
+            document.getElementById('tx-note').value = '';
+            document.getElementById('custom-cat-name').value = '';
+            document.getElementById('custom-cat-emoji').value = '';
+            markEmoji(EMOJI_PICKERS[0]);
+
+            closeModal('transaction-modal');
+            renderAllViews();
+        }
+
+        function editTransaction(id) {
+            const tx = state.transactions.find(t => t.id === id);
+            if (!tx) return;
+
+            document.getElementById('tx-edit-id').value = tx.id;
+            document.getElementById('modal-tx-title').innerText = 'Edit Transaksi';
+            document.getElementById('tx-amount').value = formatRupiah(tx.amount);
+            document.getElementById('tx-note').value = tx.note;
+            document.getElementById('tx-date').value = tx.date;
+            setTransactionType(tx.type);
+
+            const select = document.getElementById('tx-category');
+            if (![...select.options].some(o => o.value === tx.category)) {
+                const opt = document.createElement('option');
+                opt.value = tx.category;
+                opt.innerText = tx.category;
+                select.appendChild(opt);
+            }
+            select.value = tx.category;
+            toggleCustomCategoryField(tx.category);
+
+            openModal('transaction-modal');
+        }
+
+        function deleteSingleTransaction(id) {
+            showConfirmModal(
+                'Hapus Transaksi',
+                'Apakah kamu yakin ingin menghapus transaksi ini?',
+                function() {
+                    state.transactions = state.transactions.filter(t => t.id !== id);
+                    saveToLocalStorage();
+                    renderAllViews();
+                    showToast('Transaksi dihapus', '🗑️️');
+                }
+            );
+        }
+
+        function clearAllTransactions() {
+            if (state.transactions.length === 0) {
+                showToast('Tidak ada transaksi untuk dihapus!', 'ℹ️');
+                return;
+            }
+            showConfirmModal(
+                'Hapus Semua Transaksi',
+                'Apakah kamu yakin ingin menghapus seluruh riwayat transaksi?',
+                function() {
+                    state.transactions = [];
+                    expandedHomeCategories = {};
+                    expandedAnalyticsCategories = {};
+                    saveToLocalStorage();
+                    renderAllViews();
+                    showToast('Semua transaksi telah dihapus!', '🧹');
+                }
+            );
+        }
+
+        function renderDashboardSummary() {
+            let totalIncome = 0;
+            let totalExpense = 0;
+
+            let totalPlottedBudget = 0;
+            Object.values(state.plottedBudgets).forEach(val => totalPlottedBudget += val);
+
+            state.transactions.forEach(t => {
+                if (t.type === 'income') totalIncome += t.amount;
+                else totalExpense += t.amount;
+            });
+
+            // Separated Funds Logic
+            let nonPlottedExpenses = 0;
+
+            state.transactions.filter(t => t.type === 'expense').forEach(t => {
+                if (!state.plottedBudgets[t.category]) {
+                    nonPlottedExpenses += t.amount;
+                }
+            });
+
+            const mainAvailableBalance = totalIncome - totalPlottedBudget - nonPlottedExpenses;
+
+            document.getElementById('main-balance').innerText = formatRupiah(mainAvailableBalance);
+            document.getElementById('total-income').innerText = `Rp ${formatRupiah(totalIncome)}`;
+            document.getElementById('total-expense').innerText = `Rp ${formatRupiah(totalExpense)}`;
+            document.getElementById('summary-plotted-amount').innerText = `Rp ${formatRupiah(totalPlottedBudget)}`;
+
+            // Monthly Budget calculation for Indicator
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            const monthlyExpense = state.transactions
+                .filter(t => {
+                    const { year, month } = parseIsoDate(t.date);
+                    return t.type === 'expense' && month === currentMonth && year === currentYear;
+                })
+                .reduce((acc, t) => acc + t.amount, 0);
+
+            const budgetLimit = state.profile.monthlyBudget || 1000000;
+            const percentage = Math.min(100, Math.round((monthlyExpense / budgetLimit) * 100));
+
+            document.getElementById('budget-percentage').innerText = `${percentage}%`;
+            document.getElementById('budget-bar').style.width = `${percentage}%`;
+            document.getElementById('budget-used').innerText = `Rp ${formatRupiah(monthlyExpense)}`;
+            document.getElementById('budget-limit').innerText = `Rp ${formatRupiah(budgetLimit)}`;
+
+            // Health badge & Boros Notification Trigger
+            const badge = document.getElementById('health-badge');
+            if (percentage >= 100) {
+                badge.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30 animate-pulse";
+                badge.innerText = "Boros! 🚨";
+                
+                if (!hasAlertedBoros) {
+                    showToast("🚨 PERINGATAN BOROS! Pengeluaran telah melebihi batas anggaran bulanan!", "⚠️");
+                    hasAlertedBoros = true;
+                }
+            } else if (percentage >= 80) {
+                badge.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                badge.innerText = "Hati-hati ⚠️";
+                hasAlertedBoros = false;
+            } else {
+                badge.className = "px-3 py-1 rounded-full text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                badge.innerText = "Aman 👍";
+                hasAlertedBoros = false;
+            }
+        }
+
+        function renderTransactions() {
+            const list = document.getElementById('transaction-list');
+            list.innerHTML = '';
+
+            if (state.transactions.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-8 text-slate-500">
+                        <span class="text-3xl">🍃</span>
+                        <p class="text-xs font-semibold mt-2">Belum ada transaksi</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group transactions by category
+            const grouped = {};
+            state.transactions.forEach(t => {
+                if (!grouped[t.category]) {
+                    grouped[t.category] = {
+                        categoryName: t.category,
+                        totalAmount: 0,
+                        items: []
+                    };
+                }
+                grouped[t.category].items.push(t);
+                grouped[t.category].totalAmount += (t.type === 'expense' ? t.amount : -t.amount);
+            });
+
+            Object.values(grouped).forEach(group => {
+                const catKey = group.categoryName;
+                const isExpanded = !!expandedHomeCategories[catKey];
+                const parts = catKey.split(' ');
+                const icon = parts[0] || '💸';
+                const name = parts.slice(1).join(' ') || catKey;
+
+                const card = document.createElement('div');
+                card.className = "glass-card-dark rounded-2xl border border-white/10 overflow-hidden transition-all";
+
+                // Group Main Header
+                card.innerHTML = `
+                    <div onclick="toggleHomeCategoryExpand('${escapeHtml(catKey)}')" class="p-3.5 flex justify-between items-center cursor-pointer hover:bg-white/5 transition">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-300 border border-purple-500/20 flex items-center justify-center font-bold text-base">
+                                ${icon}
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-white">${escapeHtml(name)}</h4>
+                                <p class="text-[10px] text-slate-400">${group.items.length} transaksi recorded</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-extrabold ${group.totalAmount >= 0 ? 'text-rose-400' : 'text-emerald-400'}">
+                                ${group.totalAmount >= 0 ? '-' : '+'} Rp ${formatRupiah(Math.abs(group.totalAmount))}
+                            </span>
+                            <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 text-slate-400"></i>
+                        </div>
+                    </div>
+                    ${isExpanded ? `
+                        <div class="border-t border-white/10 bg-slate-950/40 p-2 space-y-2">
+                            ${group.items.map(item => `
+                                <div class="p-2.5 rounded-xl bg-white/5 flex justify-between items-center text-xs">
+                                    <div>
+                                        <p class="font-semibold text-white">${escapeHtml(item.note)}</p>
+                                        <p class="text-[10px] text-slate-400">${formatDisplayDate(item.date)}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-extrabold ${item.type === 'expense' ? 'text-rose-400' : 'text-emerald-400'}">
+                                            ${item.type === 'expense' ? '-' : '+'} Rp ${formatRupiah(item.amount)}
+                                        </span>
+                                        <button onclick="editTransaction('${item.id}')" class="p-1 text-slate-400 hover:text-purple-300" title="Edit">
+                                            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                        <button onclick="deleteSingleTransaction('${item.id}')" class="p-1 text-slate-400 hover:text-rose-400" title="Hapus">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+
+                list.appendChild(card);
+            });
+
+            refreshIcons();
+        }
+
+        function toggleHomeCategoryExpand(catKey) {
+            expandedHomeCategories[catKey] = !expandedHomeCategories[catKey];
+            renderTransactions();
+        }
+
+        function formatDisplayDate(dateStr) {
+            const { year, month, day } = parseIsoDate(dateStr);
+            const monthName = monthNames[month] || '';
+            return `${day} ${monthName} ${year}`;
+        }
+
+        function renderPlottedCategories() {
+            const list = document.getElementById('plotted-category-list');
+            list.innerHTML = '';
+
+            const keys = Object.keys(state.plottedBudgets);
+            if (keys.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-6 text-slate-500 glass-card-dark rounded-2xl border border-white/5">
+                        <span class="text-2xl">📊</span>
+                        <p class="text-xs font-semibold mt-1">Belum ada plotting dana kategori</p>
+                    </div>
+                `;
+                return;
+            }
+
+            keys.forEach(cat => {
+                const targetAmount = state.plottedBudgets[cat];
+                const spentAmount = state.transactions
+                    .filter(t => t.type === 'expense' && t.category === cat)
+                    .reduce((sum, t) => sum + t.amount, 0);
+
+                const remaining = Math.max(0, targetAmount - spentAmount);
+                const percent = Math.min(100, Math.round((spentAmount / targetAmount) * 100));
+
+                const card = document.createElement('div');
+                card.className = "glass-card-dark p-4 rounded-2xl space-y-2 border border-white/10";
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-white flex items-center gap-1.5">${escapeHtml(cat)}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold text-purple-300">Target: Rp ${formatRupiah(targetAmount)}</span>
+                            <button onclick="deletePlotting('${escapeHtml(cat)}')" class="text-slate-500 hover:text-rose-400 p-0.5" title="Hapus Plotting">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden p-0.5 border border-white/5">
+                        <div class="bg-gradient-to-r ${percent >= 100 ? 'from-rose-500 to-red-500' : 'from-purple-500 to-pink-500'} h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-[11px] text-slate-400">
+                        <span>Terpakai: <strong class="text-slate-200">Rp ${formatRupiah(spentAmount)}</strong></span>
+                        <span class="${remaining === 0 ? 'text-rose-400 font-bold' : 'text-emerald-300 font-bold'}">
+                            Sisa: Rp ${formatRupiah(remaining)}
+                        </span>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+
+            refreshIcons();
+        }
+
+        function handleSavePlotting(e) {
+            e.preventDefault();
+            const cat = document.getElementById('plotting-category-select').value;
+            const amount = parseFormattedNumber(document.getElementById('plotting-amount').value);
+
+            if (!amount || amount <= 0) {
+                showToast('Masukkan nominal plotting yang valid!', '⚠️');
+                return;
+            }
+
+            state.plottedBudgets[cat] = amount;
+            saveToLocalStorage();
+            closeModal('plotting-modal');
+            renderAllViews();
+            showToast(`Plotting Rp ${formatRupiah(amount)} disimpan!`, '🎯');
+        }
+
+        function deletePlotting(cat) {
+            showConfirmModal(
+                'Hapus Plotting',
+                `Hapus alokasi plotting untuk ${cat}?`,
+                function() {
+                    delete state.plottedBudgets[cat];
+                    saveToLocalStorage();
+                    renderAllViews();
+                    showToast('Plotting dihapus', '🗑️');
+                }
+            );
+        }
+
+        function renderSavingsGoals() {
+            const list = document.getElementById('savings-list');
+            list.innerHTML = '';
+
+            if (state.savingsGoals.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-6 text-slate-500">
+                        <span class="text-2xl">🎯</span>
+                        <p class="text-xs font-semibold mt-1">Belum ada target impian</p>
+                    </div>
+                `;
+                return;
+            }
+
+            state.savingsGoals.forEach(g => {
+                const percent = Math.min(100, Math.round((g.current / g.target) * 100));
+                const rem = Math.max(0, g.target - g.current);
+
+                const card = document.createElement('div');
+                card.className = "glass-card-dark p-4 rounded-3xl space-y-3 border border-white/10 relative overflow-hidden";
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="text-sm font-bold text-white">${escapeHtml(g.title)}</h4>
+                            <p class="text-[11px] text-slate-400">Target: Rp ${formatRupiah(g.target)}</p>
+                        </div>
+                        <button onclick="deleteSavingsGoal('${g.id}')" class="text-slate-500 hover:text-rose-400">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[11px]">
+                            <span class="text-pink-300 font-bold">Terkumpul: Rp ${formatRupiah(g.current)}</span>
+                            <span class="text-slate-400 font-semibold">${percent}%</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5 border border-white/5">
+                            <div class="bg-gradient-to-r from-pink-500 to-rose-400 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-1">
+                        <span class="text-[10px] text-slate-400">
+                            ${rem === 0 ? '🎉 Impian Tercapai!' : `Sisa Rp ${formatRupiah(rem)}`}
+                        </span>
+                        <button onclick="openDepositModal('${g.id}', '${escapeHtml(g.title)}')" class="px-3 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-bold flex items-center gap-1 hover:bg-emerald-500/30 transition">
+                            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Tabung
+                        </button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+
+            refreshIcons();
+        }
+
+        function handleSaveSavingsGoal(e) {
+            e.preventDefault();
+            const title = document.getElementById('goal-title').value.trim();
+            const target = parseFormattedNumber(document.getElementById('goal-target').value);
+            const initial = parseFormattedNumber(document.getElementById('goal-initial').value);
+
+            if (!title || !target) {
+                showToast('Isi judul dan nominal target!', '⚠️️');
+                return;
+            }
+
+            state.savingsGoals.push({
+                id: 'goal_' + Date.now(),
+                title,
+                target,
+                current: initial
+            });
+
+            saveToLocalStorage();
+            closeModal('savings-modal');
+            renderSavingsGoals();
+            showToast('Target impian berhasil dibuat!', '🎯');
+        }
+
+        function deleteSavingsGoal(id) {
+            showConfirmModal(
+                'Hapus Target Impian',
+                'Apakah kamu yakin ingin menghapus target ini?',
+                function() {
+                    state.savingsGoals = state.savingsGoals.filter(g => g.id !== id);
+                    saveToLocalStorage();
+                    renderSavingsGoals();
+                    showToast('Target dihapus', '🗑️');
+                }
+            );
+        }
+
+        function openDepositModal(id, title) {
+            document.getElementById('deposit-goal-id').value = id;
+            document.getElementById('deposit-goal-name').innerText = `Target: ${title}`;
+            document.getElementById('deposit-amount').value = '';
+            openModal('deposit-modal');
+        }
+
+        function handleSaveDeposit(e) {
+            e.preventDefault();
+            const id = document.getElementById('deposit-goal-id').value;
+            const amount = parseFormattedNumber(document.getElementById('deposit-amount').value);
+
+            if (!amount || amount <= 0) {
+                showToast('Masukkan nominal tabungan!', '⚠️');
+                return;
+            }
+
+            const goal = state.savingsGoals.find(g => g.id === id);
+            if (goal) {
+                goal.current += amount;
+                saveToLocalStorage();
+                renderSavingsGoals();
+                closeModal('deposit-modal');
+                showToast(`Ditambahkan Rp ${formatRupiah(amount)} ke target!`, '💰');
+            }
+        }
+
+        function updateFilterLabels() {
+            document.getElementById('label-selected-month').innerText = monthNames[selectedMonth];
+            document.getElementById('label-selected-year').innerText = selectedYear;
+            document.getElementById('label-selected-week').innerText = selectedWeek === 'all' ? 'Semua Mgg' : `Minggu ${selectedWeek}`;
+        }
+
+        function openMonthSelectorModal() {
+            const container = document.getElementById('months-grid-container');
+            container.innerHTML = '';
+
+            monthNames.forEach((m, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => {
+                    selectedMonth = idx; saveUi();
+                    updateFilterLabels();
+                    closeModal('month-selector-modal');
+                    renderAnalytics();
+                };
+                btn.className = `py-2 px-1 rounded-xl text-xs font-bold transition ${selectedMonth === idx ? 'bg-purple-600 text-white shadow-md' : 'glass-pill text-slate-300 hover:bg-white/20'}`;
+                btn.innerText = m.substring(0, 3);
+                container.appendChild(btn);
+            });
+
+            openModal('month-selector-modal');
+        }
+
+        function openYearSelectorModal() {
+            const container = document.getElementById('years-grid-container');
+            container.innerHTML = '';
+
+            const currentYr = new Date().getFullYear();
+            const years = [];
+            for (let y = currentYr - 3; y <= currentYr + 6; y++) {
+                years.push(y);
+            }
+
+            years.forEach(yr => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => {
+                    selectedYear = yr; saveUi();
+                    updateFilterLabels();
+                    closeModal('year-selector-modal');
+                    renderAnalytics();
+                };
+                btn.className = `py-2 px-1 rounded-xl text-xs font-bold transition ${selectedYear === yr ? 'bg-purple-600 text-white shadow-md' : 'glass-pill text-slate-300 hover:bg-white/20'}`;
+                btn.innerText = yr;
+                container.appendChild(btn);
+            });
+
+            openModal('year-selector-modal');
+        }
+
+        function openWeekSelectorModal() {
+            const container = document.getElementById('weeks-list-container');
+            container.innerHTML = '';
+
+            const weeks = [
+                { id: 'all', label: 'Semua Minggu Dalam Bulan' },
+                { id: 1, label: 'Minggu 1 (Tgl 1 - 7)' },
+                { id: 2, label: 'Minggu 2 (Tgl 8 - 14)' },
+                { id: 3, label: 'Minggu 3 (Tgl 15 - 21)' },
+                { id: 4, label: 'Minggu 4 (Tgl 22 - Akhir)' }
+            ];
+
+            weeks.forEach(w => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => {
+                    selectedWeek = w.id; saveUi();
+                    updateFilterLabels();
+                    closeModal('week-selector-modal');
+                    renderAnalytics();
+                };
+                btn.className = `w-full py-2.5 px-3 text-left rounded-xl text-xs font-semibold transition ${selectedWeek === w.id ? 'bg-purple-600 text-white' : 'glass-pill text-slate-300 hover:bg-white/20'}`;
+                btn.innerText = w.label;
+                container.appendChild(btn);
+            });
+
+            openModal('week-selector-modal');
+        }
+
+        function renderAnalytics() {
+            let filteredTx = state.transactions.filter(t => t.type === 'expense');
+
+            // Filter by Month and Year using timezone-robust parser
+            filteredTx = filteredTx.filter(t => {
+                const { year, month, day } = parseIsoDate(t.date);
+                if (month !== selectedMonth || year !== selectedYear) return false;
+
+                if (selectedWeek !== 'all') {
+                    if (selectedWeek === 1) return day >= 1 && day <= 7;
+                    if (selectedWeek === 2) return day >= 8 && day <= 14;
+                    if (selectedWeek === 3) return day >= 15 && day <= 21;
+                    if (selectedWeek === 4) return day >= 22;
+                }
+                return true;
+            });
+
+            const monthTitle = monthNames[selectedMonth];
+            const weekTitle = selectedWeek === 'all' ? '' : `, Mgg ${selectedWeek}`;
+            document.getElementById('chart-period-title').innerText = `Statistik ${monthTitle} ${selectedYear}${weekTitle}`;
+
+            const catMap = {};
+            const catItemsMap = {};
+            let periodSum = 0;
+
+            filteredTx.forEach(t => {
+                periodSum += t.amount;
+                if (!catMap[t.category]) {
+                    catMap[t.category] = 0;
+                    catItemsMap[t.category] = [];
+                }
+                catMap[t.category] += t.amount;
+                catItemsMap[t.category].push(t);
+            });
+
+            document.getElementById('period-total').innerText = `Rp ${formatRupiah(periodSum)}`;
+
+            // Render Chart.js
+            renderChart(catMap);
+
+            // Render Accordion Category Breakdown
+            const breakdownContainer = document.getElementById('category-breakdown');
+            breakdownContainer.innerHTML = '';
+
+            const categoriesArr = Object.entries(catMap);
+            if (categoriesArr.length === 0) {
+                breakdownContainer.innerHTML = `
+                    <div class="text-center py-6 text-slate-500 glass-card-dark rounded-2xl border border-white/5">
+                        <span class="text-2xl">🍃</span>
+                        <p class="text-xs font-semibold mt-1">Belum ada data pengeluaran pada periode ini</p>
+                    </div>
+                `;
+                return;
+            }
+
+            categoriesArr.forEach(([catName, amount]) => {
+                const percent = periodSum > 0 ? Math.round((amount / periodSum) * 100) : 0;
+                const items = catItemsMap[catName] || [];
+                const isExpanded = !!expandedAnalyticsCategories[catName];
+
+                const card = document.createElement('div');
+                card.className = "glass-card-dark rounded-2xl border border-white/5 overflow-hidden transition-all";
+
+                card.innerHTML = `
+                    <div onclick="toggleAnalyticsCategoryExpand('${escapeHtml(catName)}')" class="p-3.5 space-y-2 cursor-pointer hover:bg-white/5 transition">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-white flex items-center gap-1">
+                                ${escapeHtml(catName)}
+                            </span>
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-rose-300">Rp ${formatRupiah(amount)} (${percent}%)</span>
+                                <i data-lucide="${isExpanded ? 'chevron-up' : 'chevron-down'}" class="w-4 h-4 text-slate-400"></i>
+                            </div>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                    ${isExpanded ? `
+                        <div class="border-t border-white/10 bg-slate-950/40 p-2 space-y-2">
+                            ${items.map(it => `
+                                <div class="p-2 rounded-xl bg-white/5 flex justify-between items-center text-xs">
+                                    <div>
+                                        <p class="font-semibold text-white">${escapeHtml(it.note)}</p>
+                                        <p class="text-[10px] text-slate-400">${formatDisplayDate(it.date)}</p>
+                                    </div>
+                                    <span class="font-extrabold text-rose-400">- Rp ${formatRupiah(it.amount)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+                breakdownContainer.appendChild(card);
+            });
+
+            refreshIcons();
+        }
+
+        function toggleAnalyticsCategoryExpand(catName) {
+            expandedAnalyticsCategories[catName] = !expandedAnalyticsCategories[catName];
+            renderAnalytics();
+        }
+
+        function renderChart(catMap) {
+            if (typeof window.Chart === 'undefined') return; // Chart.js gagal dimuat: lewati grafik, bagian lain tetap jalan
+            const ctx = document.getElementById('expenseChart').getContext('2d');
+            
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            const labels = Object.keys(catMap);
+            const data = Object.values(catMap);
+
+            if (labels.length === 0) {
+                myChart = new window.Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Tidak Ada Data'],
+                        datasets: [{ data: [1], backgroundColor: ['rgba(255, 255, 255, 0.1)'] }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        cutout: '70%'
+                    }
+                });
+                return;
+            }
+
+            const colors = ['#a855f7', '#ec4899', '#f43f5e', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6'];
+
+            myChart = new window.Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#e2e8f0',
+                                font: { size: 10, family: 'Plus Jakarta Sans' },
+                                boxWidth: 10
+                            }
+                        }
+                    },
+                    cutout: '68%'
+                }
+            });
+        }
+
+        function renderProfile() {
+            document.getElementById('user-name-display').innerText = `Halo, ${state.profile.name}! 👋`;
+            const av = document.getElementById('user-avatar');
+            av.onerror = function() { av.onerror = null; av.src = initialsAvatar(state.profile.name); };
+            av.src = state.profile.avatar || initialsAvatar(state.profile.name);
+            if (session) {
+                document.getElementById('profile-account-email').textContent = session.email;
+                document.getElementById('profile-account-provider').textContent = providerLabel(session);
+            }
+            updateInstallCard();
+        }
+
+        function handleSaveProfile(e) {
+            e.preventDefault();
+            const name = document.getElementById('profile-name-input').value.trim();
+            const avatar = document.getElementById('profile-avatar-input').value.trim();
+            const budget = parseFormattedNumber(document.getElementById('profile-budget-input').value);
+
+            state.profile.name = name || 'Alex';
+            state.profile.avatar = avatar || pendingAvatar || state.profile.avatar;
+            pendingAvatar = '';
+            state.profile.monthlyBudget = budget || 1000000;
+
+            saveToLocalStorage();
+            renderAllViews();
+            closeModal('profile-modal');
+            showToast('Profil iWallet berhasil diperbarui!', '✨');
+        }
+
+        function exportToSpreadsheetCSV() {
+            if (state.transactions.length === 0) {
+                showToast('Tidak ada transaksi untuk diekspor!', '⚠️');
+                return;
+            }
+
+            // UTF-8 BOM prefix (\uFEFF) ensures Excel opens emojis and text properly
+            let csv = "\uFEFFNama Pengeluaran,Kategori,Harga,Tanggal,Bulan,Tahun\n";
+            state.transactions.forEach(t => {
+                const { year, month, day } = parseIsoDate(t.date);
+                const isExp = t.type === 'expense';
+                const prefix = isExp ? '-' : '+';
+                csv += `"${escapeCsv(t.note)}","${escapeCsv(t.category)}","${prefix}${t.amount}","${day}","${monthNames[month]}","${year}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `iWallet_Laporan_Spreadsheet_${getTodayISODate()}.csv`);
+            a.click();
+            showToast('Laporan CSV berhasil diunduh!', '📊');
+        }
+
+        function escapeCsv(str) {
+            return String(str || '').replace(/"/g, '""');
+        }
+
+        function resetAllAppData() {
+            showConfirmModal(
+                'Reset Seluruh Data',
+                'Apakah kamu yakin ingin MERESET SELURUH DATA iWallet? Semua transaksi, plotting, dan target akan dihapus.',
+                function() {
+                    window.__skipFlush = true;
+                    if (session) { lsDel(dataKey()); lsDel(UI_PREFIX + session.email); }
+                    lsDel(LEGACY_KEY);
+                    lsDel('sisasaku_app_state');
+                    location.reload();
+                }
+            );
+        }
+
+
+        /* =====================================================================
+           AUTH + PENYIMPANAN LOKAL
+           - Sesi login   : localStorage 'iwallet_session'
+           - Data aplikasi: localStorage 'iwallet_data::<email>' (per akun)
+           - Preferensi UI: localStorage 'iwallet_ui::<email>' (tab & filter)
+           ===================================================================== */
+        const SESSION_KEY = 'iwallet_session';
+        const LEGACY_KEY = 'iwallet_app_state';
+        const LEGACY_CLAIM_KEY = 'iwallet_legacy_claimed';
+        const DATA_PREFIX = 'iwallet_data::';
+        const UI_PREFIX = 'iwallet_ui::';
+        const RELAY_DOMAIN = '@privaterelay.appleid.com';
+
+        let session = null;
+        let currentTab = 'home';
+        let pendingLogin = null;
+        let resendTimer = null;
+        let bannerTimer = null;
+        let providerCtx = null;
+        let storageWarned = false;
+
+        const byId = (id) => document.getElementById(id);
+
+        /* ---------- localStorage aman (tidak crash jika diblokir) ---------- */
+        function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+        function lsSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+        function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+        function readSession() {
+            const raw = lsGet(SESSION_KEY);
+            if (!raw) return null;
+            try {
+                const s = JSON.parse(raw);
+                return (s && typeof s.email === 'string' && s.email) ? s : null;
+            } catch (e) { return null; }
+        }
+
+        function dataKey() { return DATA_PREFIX + (session ? session.email : 'guest'); }
+
+        /* ---------- Helper nama & avatar ---------- */
+        function nameFromEmail(email) {
+            const first = String(email || '').split('@')[0]
+                .replace(/[._\-+]+/g, ' ').replace(/\d+/g, ' ').trim().split(/\s+/)[0] || 'Kamu';
+            return first.charAt(0).toUpperCase() + first.slice(1, 20);
+        }
+
+        function initialsAvatar(name) {
+            const ch = (String(name || '?').trim().charAt(0) || '?').toUpperCase()
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const svg = "<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'>" +
+                "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='#8B5CF6'/><stop offset='1' stop-color='#EC4899'/></linearGradient></defs>" +
+                "<rect width='150' height='150' fill='url(#g)'/>" +
+                "<text x='75' y='78' text-anchor='middle' dominant-baseline='central' font-family='Arial,Helvetica,sans-serif' font-size='70' font-weight='700' fill='white'>" + ch + "</text></svg>";
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+
+        function relayEmail(email) {
+            // Hash deterministik, supaya email tersembunyi yang sama selalu menuju data yang sama
+            let h1 = 5381, h2 = 52711;
+            for (let i = 0; i < email.length; i++) {
+                const c = email.charCodeAt(i);
+                h1 = ((h1 << 5) + h1 + c) >>> 0;
+                h2 = ((h2 << 5) ^ (h2 >>> 3) ^ c) >>> 0;
+            }
+            return h1.toString(36) + h2.toString(36) + RELAY_DOMAIN;
+        }
+
+        function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
+
+        /* ---------- State per akun ---------- */
+        function freshState(name) {
+            return {
+                profile: {
+                    name: name || 'Kamu',
+                    avatar: initialsAvatar(name || 'K'),
+                    monthlyBudget: 1000000
+                },
+                transactions: [],
+                plottedBudgets: {},
+                savingsGoals: [],
+                customCategories: []
+            };
+        }
+
+        function normalizeState(p) {
+            const b = freshState('');
+            p = (p && typeof p === 'object') ? p : {};
+            return {
+                ...b, ...p,
+                profile: { ...b.profile, ...(p.profile || {}) },
+                transactions: Array.isArray(p.transactions) ? p.transactions : [],
+                plottedBudgets: (p.plottedBudgets && typeof p.plottedBudgets === 'object') ? p.plottedBudgets : {},
+                savingsGoals: Array.isArray(p.savingsGoals) ? p.savingsGoals : [],
+                customCategories: Array.isArray(p.customCategories) ? p.customCategories : []
+            };
+        }
+
+        function saveToLocalStorage() {
+            if (!session) return;
+            const ok = lsSet(dataKey(), JSON.stringify(state));
+            if (!ok && !storageWarned) {
+                storageWarned = true;
+                showToast('Penyimpanan browser tidak tersedia, data tidak bisa disimpan.', '⚠️');
+            }
+        }
+
+        function loadFromLocalStorage() {
+            if (!session) return;
+            let raw = lsGet(dataKey());
+
+            // Migrasi data lama (sebelum ada login) ke akun pertama yang masuk
+            if (!raw) {
+                const legacy = lsGet(LEGACY_KEY);
+                if (legacy && !lsGet(LEGACY_CLAIM_KEY)) {
+                    raw = legacy;
+                    lsSet(LEGACY_CLAIM_KEY, session.email);
+                }
+            }
+
+            if (raw) {
+                try { state = normalizeState(JSON.parse(raw)); }
+                catch (e) {
+                    console.error('Failed to parse stored state', e);
+                    lsSet(dataKey() + '::backup', raw); // simpan cadangan data rusak
+                    state = freshState(session.name);
+                }
+            } else {
+                state = freshState(session.name);
+            }
+        }
+
+        function saveUi() {
+            if (!session) return;
+            lsSet(UI_PREFIX + session.email, JSON.stringify({
+                tab: currentTab, year: selectedYear, month: selectedMonth, week: selectedWeek
+            }));
+        }
+
+        function loadUi() {
+            const now = new Date();
+            currentTab = 'home';
+            selectedYear = now.getFullYear();
+            selectedMonth = now.getMonth();
+            selectedWeek = 'all';
+            const raw = session ? lsGet(UI_PREFIX + session.email) : null;
+            if (!raw) return;
+            try {
+                const u = JSON.parse(raw);
+                // Tab terakhir sengaja tidak dipulihkan: aplikasi selalu dibuka di Dashboard.
+                if (Number.isInteger(u.year)) selectedYear = u.year;
+                if (Number.isInteger(u.month) && u.month >= 0 && u.month < 12) selectedMonth = u.month;
+                if (u.week === 'all' || [1, 2, 3, 4].includes(u.week)) selectedWeek = u.week;
+            } catch (e) {}
+        }
+
+        /* Simpan seluruh data saat pengguna meninggalkan / menutup aplikasi */
+        function flushAll() {
+            if (window.__skipFlush || !session) return;
+            saveToLocalStorage();
+            saveUi();
+        }
+        window.addEventListener('pagehide', flushAll);
+        window.addEventListener('beforeunload', flushAll);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') flushAll();
+        });
+
+        /* ---------- Masuk / keluar aplikasi ---------- */
+        function enterApp(justLoggedIn) {
+            loadFromLocalStorage();
+            loadUi();
+            byId('login-screen').classList.add('login-hidden');
+            updateFilterLabels();
+            renderAllViews();
+            setTxDateToToday();
+            switchTab(currentTab);
+            saveToLocalStorage();
+            if (justLoggedIn) showToast('Selamat datang, ' + state.profile.name + '!', '👋');
+        }
+
+        function completeLogin(user) {
+            session = {
+                email: user.email,
+                provider: user.provider || 'email',
+                name: user.name || nameFromEmail(user.email),
+                loginAt: Date.now()
+            };
+            if (!lsSet(SESSION_KEY, JSON.stringify(session))) {
+                showToast('Penyimpanan browser tidak tersedia, sesi tidak bisa disimpan.', '⚠️');
+            }
+            enterApp(true);
+        }
+
+        function logoutUser() {
+            showConfirmModal(
+                'Keluar dari iWallet',
+                'Kamu akan keluar dari akun ini. Semua datamu tetap tersimpan dan muncul lagi saat masuk dengan email yang sama.',
+                function () {
+                    flushAll();
+                    lsDel(SESSION_KEY);
+                    session = null;
+                    state = freshState('');
+                    closeModal('profile-modal');
+                    resetLoginForm();
+                    byId('login-screen').classList.remove('login-hidden');
+                    refreshIcons();
+                }
+            );
+        }
+
+        function providerLabel(s) {
+            if (!s) return '';
+            if (s.provider === 'google') return 'Masuk via Google';
+            if (s.provider === 'apple') return s.email.endsWith(RELAY_DOMAIN) ? 'Masuk via Apple (email disembunyikan)' : 'Masuk via Apple';
+            return 'Masuk via email dan kode';
+        }
+
+        /* ---------- Form login: email + kode ---------- */
+        function showFieldError(id, msg) {
+            const el = byId(id);
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+        function hideFieldError(id) { byId(id).classList.add('hidden'); }
+
+        function submitEmail(e) {
+            e.preventDefault();
+            const email = byId('login-email').value.trim().toLowerCase();
+            if (!isValidEmail(email)) {
+                showFieldError('login-email-error', 'Format email belum benar, contoh: nama@gmail.com');
+                return;
+            }
+            hideFieldError('login-email-error');
+            startVerification(email);
+        }
+
+        function startVerification(email) {
+            const code = String(Math.floor(100000 + Math.random() * 900000));
+            pendingLogin = { email, code, exp: Date.now() + 5 * 60 * 1000, tries: 0 };
+            byId('login-code-email').textContent = email;
+            byId('login-step-email').classList.add('hidden');
+            byId('login-step-code').classList.remove('hidden');
+            clearOtp();
+            hideFieldError('login-code-error');
+            startResendTimer();
+            showOtpBanner(code);
+            const first = document.querySelector('.otp-box');
+            if (first) setTimeout(() => first.focus(), 60);
+        }
+
+        function backToEmailStep() {
+            pendingLogin = null;
+            hideOtpBanner();
+            clearInterval(resendTimer);
+            byId('login-step-code').classList.add('hidden');
+            byId('login-step-email').classList.remove('hidden');
+            byId('login-email').focus();
+        }
+
+        function resetLoginForm() {
+            pendingLogin = null;
+            hideOtpBanner();
+            clearInterval(resendTimer);
+            byId('login-email').value = '';
+            hideFieldError('login-email-error');
+            byId('login-step-code').classList.add('hidden');
+            byId('login-step-email').classList.remove('hidden');
+            clearOtp();
+            closeProvider();
+        }
+
+        function getOtp() { return [...document.querySelectorAll('.otp-box')].map(b => b.value).join(''); }
+        function clearOtp() { document.querySelectorAll('.otp-box').forEach(b => b.value = ''); }
+
+        function startResendTimer() {
+            const btn = byId('btn-resend');
+            let left = 30;
+            clearInterval(resendTimer);
+            btn.disabled = true;
+            btn.textContent = 'Kirim ulang (' + left + ')';
+            resendTimer = setInterval(() => {
+                left--;
+                if (left <= 0) {
+                    clearInterval(resendTimer);
+                    btn.disabled = false;
+                    btn.textContent = 'Kirim ulang';
+                } else {
+                    btn.textContent = 'Kirim ulang (' + left + ')';
+                }
+            }, 1000);
+        }
+
+        function resendCode() {
+            if (!pendingLogin) return;
+            startVerification(pendingLogin.email);
+            showToast('Kode baru telah dikirim', '📩');
+        }
+
+        function verifyCode(e) {
+            if (e) e.preventDefault();
+            if (!pendingLogin) return;
+            const entered = getOtp();
+            if (entered.length < 6) {
+                showFieldError('login-code-error', 'Lengkapi 6 digit kode.');
+                return;
+            }
+            if (Date.now() > pendingLogin.exp) {
+                showFieldError('login-code-error', 'Kode sudah kedaluwarsa. Kirim ulang untuk kode baru.');
+                return;
+            }
+            if (pendingLogin.tries >= 5) {
+                showFieldError('login-code-error', 'Terlalu banyak percobaan. Kirim ulang untuk kode baru.');
+                return;
+            }
+            if (entered !== pendingLogin.code) {
+                pendingLogin.tries++;
+                const box = byId('otp-boxes');
+                box.classList.remove('login-shake');
+                void box.offsetWidth;
+                box.classList.add('login-shake');
+                clearOtp();
+                document.querySelector('.otp-box').focus();
+                showFieldError('login-code-error', 'Kode salah. Sisa percobaan: ' + Math.max(0, 5 - pendingLogin.tries) + '.');
+                return;
+            }
+            const email = pendingLogin.email;
+            pendingLogin = null;
+            clearInterval(resendTimer);
+            hideOtpBanner();
+            completeLogin({ email, provider: 'email' });
+        }
+
+        function showOtpBanner(code) {
+            const b = byId('otp-banner');
+            byId('otp-banner-code').textContent = code;
+            b.dataset.code = code;
+            b.style.transform = 'translateY(0)';
+            b.style.opacity = '1';
+            b.style.pointerEvents = 'auto';
+            clearTimeout(bannerTimer);
+            bannerTimer = setTimeout(hideOtpBanner, 20000);
+        }
+
+        function hideOtpBanner() {
+            const b = byId('otp-banner');
+            b.style.transform = '';
+            b.style.opacity = '';
+            b.style.pointerEvents = '';
+            clearTimeout(bannerTimer);
+        }
+
+        function fillOtpFromBanner() {
+            const code = byId('otp-banner').dataset.code || '';
+            if (code.length !== 6) return;
+            document.querySelectorAll('.otp-box').forEach((b, i) => b.value = code[i]);
+            hideOtpBanner();
+            verifyCode();
+        }
+
+        function bindOtpBoxes() {
+            const boxes = [...document.querySelectorAll('.otp-box')];
+            boxes.forEach((b, i) => {
+                b.addEventListener('input', () => {
+                    b.value = b.value.replace(/\D/g, '').slice(-1);
+                    hideFieldError('login-code-error');
+                    if (b.value && i < 5) boxes[i + 1].focus();
+                    if (getOtp().length === 6) verifyCode();
+                });
+                b.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Backspace' && !b.value && i > 0) { boxes[i - 1].value = ''; boxes[i - 1].focus(); }
+                    if (ev.key === 'ArrowLeft' && i > 0) boxes[i - 1].focus();
+                    if (ev.key === 'ArrowRight' && i < 5) boxes[i + 1].focus();
+                });
+                b.addEventListener('paste', (ev) => {
+                    ev.preventDefault();
+                    const t = ((ev.clipboardData || window.clipboardData).getData('text') || '').replace(/\D/g, '').slice(0, 6);
+                    if (!t) return;
+                    t.split('').forEach((c, k) => { boxes[k].value = c; });
+                    boxes[Math.min(t.length, 5)].focus();
+                    if (t.length === 6) verifyCode();
+                });
+            });
+        }
+
+        /* ---------- Google / Apple (simulasi, tanpa server) ---------- */
+        function openProvider(p) {
+            providerCtx = p;
+            byId('provider-title').textContent = p === 'google' ? 'Masuk dengan Google' : 'Masuk dengan Apple';
+            const srcSvg = document.querySelector('#btn-' + p + ' svg');
+            byId('provider-icon').innerHTML = srcSvg ? srcSvg.outerHTML : '';
+            byId('provider-hide-wrap').style.display = p === 'apple' ? 'flex' : 'none';
+            byId('provider-hide').checked = false;
+            byId('provider-email').value = byId('login-email').value.trim();
+            hideFieldError('provider-error');
+            byId('provider-sheet').style.display = 'flex';
+            setTimeout(() => byId('provider-email').focus(), 60);
+        }
+
+        function closeProvider() {
+            const s = byId('provider-sheet');
+            if (s) s.style.display = 'none';
+        }
+
+        function submitProvider(e) {
+            e.preventDefault();
+            const realEmail = byId('provider-email').value.trim().toLowerCase();
+            if (!isValidEmail(realEmail)) {
+                showFieldError('provider-error', 'Format email belum benar, contoh: nama@gmail.com');
+                return;
+            }
+            const name = nameFromEmail(realEmail);
+            let email = realEmail;
+            if (providerCtx === 'apple' && byId('provider-hide').checked) email = relayEmail(realEmail);
+            const provider = providerCtx;
+            closeProvider();
+            completeLogin({ email, provider, name });
+        }
+
+        /* ---------- Favicon dari logo ---------- */
+        function setFaviconFromLogo() {
+            const logo = byId('login-logo');
+            if (!logo) return;
+            try {
+                const svg = new XMLSerializer().serializeToString(logo);
+                let link = document.getElementById('app-favicon');
+                if (!link) {
+                    link = document.createElement('link');
+                    link.id = 'app-favicon';
+                    link.rel = 'icon';
+                    document.head.appendChild(link);
+                }
+                link.type = 'image/svg+xml';
+                link.href = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+            } catch (e) {}
+        }
+
+
+        /* =====================================================================
+           KATEGORI: pemilih emoji + daftar kategori
+           ===================================================================== */
+        const EMOJI_CHOICES = [
+            '🍔','🍕','🍜','🍙','☕','🧋','🍰','🍿',
+            '🛒','👕','👟','💄','🧴','💊','🏥','🦷',
+            '📚','✏️','🎒','🎓','🎮','🎧','🎬','🎵',
+            '⚽','🏋️','🚌','🛵','🚗','⛽','✈️','📱',
+            '💻','💡','💧','🏠','🎁','🎂','🐶','🐱',
+            '🌱','💰','🏦','🐷','🧾','💳','🎨','📷',
+            '🧹','🛠️','✂️','🧸','🤝','❤️','⭐','🎉'
+        ];
+        const EMOJI_PICKERS = [
+            { box: 'tx-emoji-picker', input: 'custom-cat-emoji' },
+            { box: 'cat-emoji-picker', input: 'cat-new-emoji' }
+        ];
+
+        /* Ambil 1 karakter emoji pertama (aman untuk emoji gabungan seperti 🏋️ atau 👨‍👩‍👧) */
+        function firstGrapheme(str) {
+            str = String(str || '').trim();
+            if (!str) return '';
+            try {
+                if (window.Intl && Intl.Segmenter) {
+                    const first = new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(str)[Symbol.iterator]().next();
+                    if (first.value) return first.value.segment;
+                }
+            } catch (e) {}
+            return Array.from(str)[0] || '';
+        }
+
+        function emojiBtnClass(selected) {
+            return 'w-full aspect-square rounded-xl text-lg flex items-center justify-center border transition active:scale-90 ' +
+                (selected ? 'bg-purple-500/30 border-purple-400 ring-1 ring-purple-400/60' : 'bg-white/5 border-white/10 hover:bg-white/15');
+        }
+
+        function markEmoji(pk) {
+            const box = byId(pk.box), input = byId(pk.input);
+            if (!box || !input) return;
+            const cur = firstGrapheme(input.value);
+            box.querySelectorAll('button').forEach(function (b) {
+                const on = b.dataset.emoji === cur;
+                b.className = emojiBtnClass(on);
+                b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+        }
+
+        function initEmojiPickers() {
+            EMOJI_PICKERS.forEach(function (pk) {
+                const box = byId(pk.box), input = byId(pk.input);
+                if (!box || !input || box.dataset.ready) return;
+                box.dataset.ready = '1';
+                EMOJI_CHOICES.forEach(function (em) {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.textContent = em;
+                    b.dataset.emoji = em;
+                    b.setAttribute('aria-label', 'Ikon ' + em);
+                    b.onclick = function () { input.value = em; markEmoji(pk); };
+                    box.appendChild(b);
+                });
+                input.addEventListener('input', function () {
+                    const g = firstGrapheme(input.value);
+                    if (input.value !== g) input.value = g;
+                    markEmoji(pk);
+                });
+                markEmoji(pk);
+            });
+        }
+
+        function splitCategory(cat) {
+            const i = String(cat).indexOf(' ');
+            return i === -1 ? { icon: '✨', name: String(cat) } : { icon: cat.slice(0, i), name: cat.slice(i + 1) };
+        }
+
+        let _baseTxOptions = null, _basePlotOptions = null;
+
+        function fillSelect(sel, base, custom, withCustomEntry) {
+            const cur = sel.value;
+            sel.innerHTML = '';
+            const seen = new Set();
+            function add(value, label) {
+                if (seen.has(value)) return;
+                seen.add(value);
+                const o = document.createElement('option');
+                o.value = value; o.textContent = label;
+                sel.appendChild(o);
+            }
+            base.forEach(function (b) { add(b[0], b[1]); });
+            custom.forEach(function (c) { add(c, c); });
+            if (withCustomEntry) add('__CUSTOM__', '➕ Kategori Bebas / Tambah Baru...');
+            if (seen.has(cur)) sel.value = cur;
+        }
+
+        /* Daftar pilihan kategori di form transaksi & plotting ikut menampilkan kategori buatan pengguna */
+        function renderCategoryOptions() {
+            const custom = (state && state.customCategories) || [];
+            const tx = byId('tx-category');
+            if (tx) {
+                if (!_baseTxOptions) _baseTxOptions = [...tx.options].filter(o => o.value !== '__CUSTOM__').map(o => [o.value, o.textContent]);
+                fillSelect(tx, _baseTxOptions, custom, true);
+            }
+            const ps = byId('plotting-category-select');
+            if (ps) {
+                if (!_basePlotOptions) _basePlotOptions = [...ps.options].map(o => [o.value, o.textContent]);
+                fillSelect(ps, _basePlotOptions, custom, false);
+            }
+        }
+
+        function openCategories() {
+            initEmojiPickers();
+            renderCategoryList();
+            openModal('categories-modal');
+        }
+
+        function renderCategoryList() {
+            const list = byId('category-list');
+            if (!list) return;
+            const base = _baseTxOptions || [];
+            const custom = state.customCategories || [];
+            let html = '';
+            function row(cat, label, deletable, idx) {
+                const c = splitCategory(cat);
+                return '<div class="glass-pill rounded-2xl px-3 py-2.5 flex items-center gap-3">' +
+                    '<span class="text-lg w-8 text-center">' + escapeHtml(c.icon) + '</span>' +
+                    '<span class="flex-1 min-w-0 text-xs font-semibold text-white truncate">' + escapeHtml(c.name) + '</span>' +
+                    '<span class="text-[10px] ' + (deletable ? 'text-purple-300' : 'text-slate-500') + '">' + label + '</span>' +
+                    (deletable ? '<button type="button" data-del="' + idx + '" class="p-1.5 rounded-lg hover:bg-rose-500/20 text-rose-400 transition" aria-label="Hapus kategori"><i data-lucide="trash-2" class="w-4 h-4"></i></button>' : '') +
+                    '</div>';
+            }
+            if (custom.length) {
+                html += '<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Kategori Buatanmu</p>';
+                custom.forEach(function (c, i) { html += row(c, 'Milikmu', true, i); });
+            }
+            html += '<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide pt-1">Kategori Bawaan</p>';
+            base.forEach(function (b) { html += row(b[0], 'Bawaan', false, -1); });
+            list.innerHTML = html;
+            list.querySelectorAll('button[data-del]').forEach(function (btn) {
+                btn.onclick = function () { deleteCustomCategory(parseInt(btn.dataset.del, 10)); };
+            });
+            refreshIcons();
+        }
+
+        function addCustomCategory(e) {
+            e.preventDefault();
+            const emoji = firstGrapheme(byId('cat-new-emoji').value) || '🏷️';
+            const name = byId('cat-new-name').value.trim().replace(/\s+/g, ' ');
+            if (!name) { showToast('Isi nama kategorinya dulu ya!', '⚠️'); return; }
+            const all = (_baseTxOptions || []).map(b => b[0]).concat(state.customCategories || []);
+            if (all.some(c => splitCategory(c).name.toLowerCase() === name.toLowerCase())) {
+                showToast('Kategori "' + name + '" sudah ada', '⚠️');
+                return;
+            }
+            state.customCategories.push(emoji + ' ' + name);
+            saveToLocalStorage();
+            byId('cat-new-name').value = '';
+            byId('cat-new-emoji').value = '';
+            markEmoji(EMOJI_PICKERS[1]);
+            renderAllViews();
+            renderCategoryList();
+            showToast('Kategori ' + emoji + ' ' + name + ' ditambahkan', '✅');
+        }
+
+        function deleteCustomCategory(idx) {
+            const cat = (state.customCategories || [])[idx];
+            if (!cat) return;
+            showConfirmModal(
+                'Hapus Kategori',
+                'Kategori "' + cat + '" dihapus dari daftar. Transaksi yang sudah tercatat tidak ikut terhapus.',
+                function () {
+                    state.customCategories = state.customCategories.filter(c => c !== cat);
+                    saveToLocalStorage();
+                    renderAllViews();
+                    renderCategoryList();
+                    showToast('Kategori dihapus', '🗑️');
+                }
+            );
+        }
+
+        /* =====================================================================
+           PWA: pasang di HP, penyimpanan tahan lama, dan offline
+           ===================================================================== */
+        let deferredInstall = null;
+
+        function isStandalone() {
+            return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+        }
+
+        function updateInstallCard() {
+            const card = byId('install-card');
+            if (!card) return;
+            if (isStandalone()) { card.style.display = 'none'; return; }
+            const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const btn = byId('install-btn'), hint = byId('install-hint');
+            card.style.display = 'block';
+            btn.style.display = deferredInstall ? '' : 'none';
+            hint.textContent = deferredInstall
+                ? 'Pasang agar ikon iWallet muncul di layar utama dan terbuka seperti aplikasi biasa.'
+                : ios
+                    ? 'Di Safari: ketuk tombol Bagikan, lalu pilih "Tambah ke Layar Utama".'
+                    : 'Buka menu browser (titik tiga), lalu pilih "Instal aplikasi" atau "Tambahkan ke layar utama".';
+        }
+
+        async function installApp() {
+            if (!deferredInstall) return;
+            deferredInstall.prompt();
+            try { await deferredInstall.userChoice; } catch (e) {}
+            deferredInstall = null;
+            updateInstallCard();
+        }
+
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            deferredInstall = e;
+            updateInstallCard();
+        });
+        window.addEventListener('appinstalled', function () {
+            deferredInstall = null;
+            updateInstallCard();
+            showToast('iWallet terpasang di HP-mu!', '📲');
+        });
+
+        /*PWA-JS-START*/
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('sw.js').catch(function (err) { console.warn('Service worker tidak aktif:', err); });
+            });
+        }
+        /*PWA-JS-END*/
+
+        /* Minta browser agar data aplikasi tidak dihapus otomatis saat ruang penyimpanan menipis */
+        if (navigator.storage && navigator.storage.persist) {
+            navigator.storage.persist().catch(function () {});
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

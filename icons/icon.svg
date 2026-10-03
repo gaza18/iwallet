@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="512" height="512" role="img" aria-label="Logo iWallet">
+                            <defs>
+                                <linearGradient id="lg-bg" gradientUnits="userSpaceOnUse" x1="8" y1="0" x2="112" y2="120">
+                                    <stop offset="0" stop-color="#8B5CF6"/>
+                                    <stop offset="0.55" stop-color="#D946EF"/>
+                                    <stop offset="1" stop-color="#3B82F6"/>
+                                </linearGradient>
+                                <linearGradient id="lg-gloss" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
+                                    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+                                </linearGradient>
+                                <linearGradient id="lg-glass" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#fff" stop-opacity="0.7"/>
+                                    <stop offset="1" stop-color="#fff" stop-opacity="0.22"/>
+                                </linearGradient>
+                                <linearGradient id="lg-coin" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#FEF3C7"/>
+                                    <stop offset="0.5" stop-color="#FCD34D"/>
+                                    <stop offset="1" stop-color="#F59E0B"/>
+                                </linearGradient>
+                                <clipPath id="lg-clip"><rect width="120" height="120" rx="28"/></clipPath>
+                            </defs>
+                            <!-- Squircle ikon iOS -->
+                            <rect width="120" height="120" rx="28" fill="url(#lg-bg)"/>
+                            <g clip-path="url(#lg-clip)">
+                                <circle cx="28" cy="18" r="38" fill="#fff" opacity="0.16"/>
+                                <rect width="120" height="62" fill="url(#lg-gloss)" opacity="0.45"/>
+                            </g>
+                            <rect x="0.75" y="0.75" width="118.5" height="118.5" rx="27.25" fill="none" stroke="#fff" stroke-opacity="0.45" stroke-width="1.5"/>
+                            <!-- Bayangan dompet -->
+                            <ellipse cx="60" cy="101" rx="29" ry="4" fill="#1E1B4B" opacity="0.28"/>
+                            <!-- Tutup dompet (belakang) -->
+                            <path d="M26 54 Q26 43 37 41 L81 34 Q93 32 93 43 V56 H26 Z" fill="#fff" fill-opacity="0.34" stroke="#fff" stroke-opacity="0.5" stroke-width="1.2"/>
+                            <!-- Koin jatuh ke dompet -->
+                            <circle cx="58" cy="40" r="12.5" fill="url(#lg-coin)"/>
+                            <circle cx="58" cy="40" r="8.2" fill="none" stroke="#B45309" stroke-opacity="0.4" stroke-width="1.6"/>
+                            <path d="M51.5 36.5 A8 8 0 0 1 58 32.6" fill="none" stroke="#fff" stroke-opacity="0.85" stroke-width="1.8" stroke-linecap="round"/>
+                            <!-- Badan dompet kaca -->
+                            <rect x="24" y="49" width="72" height="46" rx="14" fill="url(#lg-glass)" stroke="#fff" stroke-opacity="0.75" stroke-width="1.5"/>
+                            <path d="M35 56 H79" stroke="#fff" stroke-opacity="0.55" stroke-width="1.6" stroke-linecap="round"/>
+                            <!-- Kancing dompet -->
+                            <rect x="71" y="62" width="30" height="20" rx="10" fill="#fff" fill-opacity="0.4" stroke="#fff" stroke-opacity="0.8" stroke-width="1.3"/>
+                            <circle cx="82" cy="72" r="3.4" fill="#fff"/>
+                            <!-- Kilau -->
+                            <path d="M95 14 l2.3 6.2 L103.5 22.5 l-6.2 2.3 L95 31 l-2.3-6.2 L86.5 22.5 l6.2-2.3 z" fill="#fff" fill-opacity="0.92"/>
+                        </svg>
