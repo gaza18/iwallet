@@ -95,6 +95,38 @@
             scrollbar-width: none;
         }
 
+
+        /* ===== Optimasi HP: lebih ringan & responsif ===== */
+        html, body { overscroll-behavior-y: none; -webkit-text-size-adjust: 100%; }
+        button, a, label, select, input, [onclick] { touch-action: manipulation; }
+        .app-shell { height: 100vh; height: 100dvh; }
+
+        /* iPhone otomatis zoom jika huruf input < 16px: samakan jadi 16px agar tidak zoom */
+        @supports (-webkit-touch-callout: none) {
+            input, select, textarea { font-size: 16px !important; }
+        }
+
+        /* Layar sentuh / HP: matikan efek yang berat bagi GPU */
+        @media (pointer: coarse), (max-width: 767px) {
+            /* Lingkaran cahaya: tanpa filter blur 100px+; tepi lembut memakai mask, diam tanpa animasi */
+            .animate-blob {
+                filter: none !important;
+                animation: none !important;
+                -webkit-mask-image: radial-gradient(circle closest-side, #000 20%, transparent 100%);
+                mask-image: radial-gradient(circle closest-side, #000 20%, transparent 100%);
+            }
+            /* Blur layar penuh dimatikan (hampir tidak terlihat bedanya, tapi sangat berat) */
+            .backdrop-blur-3xl, .backdrop-blur-md, .backdrop-blur-sm,
+            .app-shell, .glass-modal {
+                -webkit-backdrop-filter: none !important;
+                backdrop-filter: none !important;
+            }
+            .login-card, .login-sheet, .login-btn-glass, #otp-banner {
+                -webkit-backdrop-filter: blur(10px) !important;
+                backdrop-filter: blur(10px) !important;
+            }
+        }
+
         /* ===== Login Screen (iOS Glass) ===== */
         .login-hidden { display: none !important; }
 
@@ -191,12 +223,215 @@
             .animate-blob, .login-shake { animation: none !important; }
             #otp-banner { transition: none; }
         }
+
+        /* =====================================================================
+           LIQUID GLASS (gaya iOS 27)
+           Bahan kaca: isi tembus pandang + sorot cahaya di tepi (specular rim)
+           + cahaya dalam + bayangan lembut. Tingkat kejernihan diatur lewat
+           variabel --lg-* (slider di Profil, seperti pengaturan opasitas iOS 27).
+           ===================================================================== */
+        :root {
+            --lg-alpha: 0.133; --lg-alpha-hi: 0.239; --lg-alpha-lo: 0.080;
+            --lg-dark-alpha: 0.60; --lg-modal-alpha: 0.89;
+            --lg-blur: 20px; --lg-sat: 175%;
+            --lg-rim: 0.45; --lg-rim-lo: 0.16;
+        }
+
+        .glass-card, .glass-card-dark, .glass-pill, .glass-modal {
+            -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat));
+            backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-sat));
+        }
+
+        /* Kartu utama (kaca terang) */
+        .glass-card {
+            background: linear-gradient(135deg, rgba(255,255,255,var(--lg-alpha-hi)) 0%, rgba(255,255,255,var(--lg-alpha)) 48%, rgba(255,255,255,var(--lg-alpha-lo)) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow:
+                inset 1.5px 1.5px 0 rgba(255,255,255,var(--lg-rim)),
+                inset -1px -1px 0 rgba(255,255,255,var(--lg-rim-lo)),
+                inset 0 0 26px rgba(255,255,255,0.06),
+                0 16px 40px rgba(0, 0, 0, 0.30);
+        }
+
+        /* Panel (kaca gelap) */
+        .glass-card-dark {
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 42%),
+                rgba(20, 18, 34, var(--lg-dark-alpha));
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            box-shadow:
+                inset 1px 1px 0 rgba(255,255,255,calc(var(--lg-rim) * 0.7)),
+                inset -1px -1px 0 rgba(255,255,255,calc(var(--lg-rim-lo) * 0.7)),
+                0 12px 30px rgba(0, 0, 0, 0.28);
+        }
+
+        /* Pil / tombol kecil */
+        .glass-pill {
+            background: linear-gradient(135deg, rgba(255,255,255,var(--lg-alpha-hi)) 0%, rgba(255,255,255,var(--lg-alpha-lo)) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow:
+                inset 1px 1px 0 rgba(255,255,255,var(--lg-rim)),
+                inset -1px -1px 0 rgba(255,255,255,var(--lg-rim-lo)),
+                0 4px 12px rgba(0, 0, 0, 0.16);
+        }
+
+        /* Lembar (modal) */
+        .glass-modal {
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 28%, rgba(255,255,255,0) 100%),
+                rgba(16, 15, 30, var(--lg-modal-alpha));
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow:
+                inset 0 1.5px 0 rgba(255,255,255,var(--lg-rim)),
+                inset 0 0 30px rgba(255,255,255,0.04),
+                0 -10px 50px rgba(0, 0, 0, 0.45);
+            animation: lg-sheet-in 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.12) both;
+        }
+        @keyframes lg-sheet-in {
+            from { opacity: 0; transform: translateY(28px) scale(0.97); }
+            to   { opacity: 1; transform: none; }
+        }
+
+        /* Elemen yang punya kelas shadow Tailwind tetap mendapat sorot kaca */
+        nav.glass-card {
+            box-shadow:
+                inset 1.5px 1.5px 0 rgba(255,255,255,var(--lg-rim)),
+                inset -1px -1px 0 rgba(255,255,255,var(--lg-rim-lo)),
+                inset 0 0 26px rgba(255,255,255,0.06),
+                0 18px 44px rgba(0, 0, 0, 0.42);
+        }
+
+        /* Latar berwarna agar kaca punya sesuatu untuk "dibiaskan" */
+        .app-shell {
+            background-image:
+                radial-gradient(70% 45% at 10% 0%, rgba(139, 92, 246, 0.30), transparent 70%),
+                radial-gradient(55% 40% at 100% 55%, rgba(59, 130, 246, 0.22), transparent 70%),
+                radial-gradient(70% 45% at 25% 105%, rgba(236, 72, 153, 0.28), transparent 70%);
+        }
+
+        /* Tab aktif: kapsul kaca seperti tab bar iOS 26/27 */
+        .nav-btn {
+            padding: 8px 6px;
+            border-radius: 9999px;
+            transition: background-color 0.35s cubic-bezier(0.2, 0.9, 0.25, 1.1), color 0.2s, box-shadow 0.35s, transform 0.2s;
+        }
+        .nav-btn[class*="text-purple-400"] {
+            background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.07));
+            box-shadow:
+                inset 1px 1px 0 rgba(255,255,255,0.5),
+                inset -1px -1px 0 rgba(255,255,255,0.14),
+                0 4px 16px rgba(139, 92, 246, 0.30);
+        }
+
+        /* Tombol gradien: permukaan kaca berkilau */
+        button[class*="bg-gradient-to-"]:not(.lg-fab) {
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow:
+                inset 0 1.5px 0 rgba(255,255,255,0.55),
+                inset 0 -3px 8px rgba(0,0,0,0.14),
+                0 10px 24px -8px rgba(0, 0, 0, 0.55);
+        }
+        button.lg-fab {
+            box-shadow:
+                inset 0 2px 0 rgba(255,255,255,0.65),
+                inset 0 -4px 10px rgba(0,0,0,0.20),
+                0 0 0 1px rgba(255,255,255,0.35),
+                0 14px 30px rgba(236, 72, 153, 0.50);
+        }
+
+        /* Kartu login memakai bahan yang sama */
+        .login-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.17) 0%, rgba(255,255,255,0.06) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow:
+                inset 1.5px 1.5px 0 rgba(255,255,255,0.45),
+                inset -1px -1px 0 rgba(255,255,255,0.14),
+                inset 0 0 30px rgba(255,255,255,0.05),
+                0 24px 60px rgba(0, 0, 0, 0.45);
+        }
+        .login-btn-glass {
+            box-shadow: inset 1px 1px 0 rgba(255,255,255,0.45), inset -1px -1px 0 rgba(255,255,255,0.12), 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .otp-box {
+            box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 0 rgba(255,255,255,0.08);
+        }
+
+        /* Slider transparansi: pegangan berbentuk kapsul kaca */
+        .lg-range { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; cursor: pointer; }
+        .lg-range:focus { outline: none; }
+        .lg-range::-webkit-slider-runnable-track {
+            height: 10px; border-radius: 999px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.30));
+            border: 1px solid rgba(255,255,255,0.20);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.40);
+        }
+        .lg-range::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 36px; height: 24px; margin-top: -8px; border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(226,222,255,0.85));
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: inset 0 1px 0 #fff, 0 3px 10px rgba(0,0,0,0.45);
+        }
+        .lg-range::-moz-range-track {
+            height: 10px; border-radius: 999px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.30));
+            border: 1px solid rgba(255,255,255,0.20);
+        }
+        .lg-range::-moz-range-thumb {
+            width: 34px; height: 22px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.8);
+            background: linear-gradient(180deg, #fff, #e2deff); box-shadow: 0 3px 10px rgba(0,0,0,0.45);
+        }
+        .lg-range:focus-visible::-webkit-slider-thumb { outline: 2px solid rgba(192,132,252,0.9); outline-offset: 2px; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .glass-modal { animation: none; }
+            .nav-btn { transition: none; }
+        }
     </style>
+
+
+    <script>
+        /* Pengaturan kejernihan Liquid Glass: 0 = jernih, 100 = berembun (disimpan di perangkat) */
+        (function () {
+            var KEY = 'iwallet_glass', DEFAULT = 55;
+            function label(v) {
+                return v <= 20 ? 'Sangat jernih' : v <= 45 ? 'Jernih' : v <= 70 ? 'Seimbang' : v <= 90 ? 'Berembun' : 'Sangat berembun';
+            }
+            window.applyGlass = function (val, persist) {
+                var v = parseInt(val, 10);
+                if (isNaN(v)) v = DEFAULT;
+                v = Math.max(0, Math.min(100, v));
+                var mq = function (q) { return !!(window.matchMedia && window.matchMedia(q).matches); };
+                var small = mq('(pointer: coarse), (max-width: 767px)');   // HP: blur lebih kecil agar ringan
+                var reduce = mq('(prefers-reduced-transparency: reduce)'); // hormati "Kurangi Transparansi"
+                var t = reduce ? 1 : v / 100;
+                var a = 0.05 + t * 0.15;
+                var rim = 0.30 + (1 - t) * 0.30;
+                var blur = reduce ? 0 : (small ? 4 + t * 10 : 8 + t * 22);
+                var r = document.documentElement.style;
+                r.setProperty('--lg-alpha', a.toFixed(3));
+                r.setProperty('--lg-alpha-hi', (a * 1.8).toFixed(3));
+                r.setProperty('--lg-alpha-lo', (a * 0.6).toFixed(3));
+                r.setProperty('--lg-dark-alpha', (0.30 + t * 0.55).toFixed(3));
+                r.setProperty('--lg-modal-alpha', (0.80 + t * 0.17).toFixed(3));
+                r.setProperty('--lg-blur', blur.toFixed(1) + 'px');
+                r.setProperty('--lg-rim', rim.toFixed(3));
+                r.setProperty('--lg-rim-lo', (rim * 0.35).toFixed(3));
+                window.__glassValue = v;
+                var lab = document.getElementById('glass-value');
+                if (lab) lab.textContent = label(v);
+                if (persist) { try { localStorage.setItem(KEY, String(v)); } catch (e) {} }
+            };
+            var saved = null;
+            try { saved = localStorage.getItem(KEY); } catch (e) {}
+            window.applyGlass(saved !== null ? saved : DEFAULT, false);
+        })();
+    </script>
 
     <!-- Tailwind CSS hasil build (jalankan: npm run build) -->
     <link rel="stylesheet" href="output.css">
 </head>
-<body class="bg-slate-950 text-white min-h-screen flex justify-center items-center p-0 md:p-6 overflow-x-hidden selection:bg-purple-500 selection:text-white">
+<body class="bg-slate-950 text-white min-h-dvh flex justify-center items-center p-0 md:p-6 overflow-x-hidden selection:bg-purple-500 selection:text-white">
 
     <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div class="absolute top-10 left-1/4 w-72 h-72 bg-purple-600 rounded-full filter blur-[100px] opacity-50 animate-blob"></div>
@@ -205,7 +440,7 @@
     </div>
 
     <!-- Mobile App Container -->
-    <div class="w-full max-w-md h-screen md:h-[880px] md:rounded-[48px] bg-slate-900/60 border border-white/10 shadow-2xl relative flex flex-col overflow-hidden z-10 backdrop-blur-3xl">
+    <div class="w-full max-w-md app-shell md:h-[880px] md:rounded-[48px] bg-slate-900/60 border border-white/10 shadow-2xl relative flex flex-col overflow-hidden z-10 backdrop-blur-3xl">
         
         <!-- Header Bar -->
         <header class="p-6 pb-2 flex justify-between items-center z-20">
@@ -431,7 +666,7 @@
 
             <!-- Elevated Center Floating Action Button -->
             <div class="relative flex justify-center items-center px-1 -mt-6">
-                <button onclick="quickAdd('🍔 Makanan & Jajan')" class="w-13 h-13 p-3.5 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 to-rose-400 flex items-center justify-center text-white shadow-xl shadow-purple-500/50 hover:scale-105 active:scale-95 transition-all border-2 border-white/40">
+                <button onclick="quickAdd('🍔 Makanan & Jajan')" class="lg-fab w-13 h-13 p-3.5 rounded-full bg-gradient-to-tr from-purple-600 via-pink-500 to-rose-400 flex items-center justify-center text-white shadow-xl shadow-purple-500/50 hover:scale-105 active:scale-95 transition-all border-2 border-white/40">
                     <i data-lucide="plus" class="w-6 h-6 stroke-[2.5]"></i>
                 </button>
             </div>
@@ -448,7 +683,7 @@
 
         <!-- MODAL 1: ADD / EDIT TRANSACTION -->
         <div id="transaction-modal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-md transition-opacity">
-            <div class="w-full max-w-md glass-modal rounded-t-[32px] sm:rounded-[32px] p-6 space-y-4 animate-in slide-in-from-bottom duration-300 border border-white/20 max-h-[90vh] overflow-y-auto">
+            <div class="w-full max-w-md glass-modal rounded-t-[32px] sm:rounded-[32px] p-6 space-y-4 animate-in slide-in-from-bottom duration-300 border border-white/20 max-h-[90dvh] overflow-y-auto">
                 <div class="flex justify-between items-center">
                     <h3 class="text-base font-bold text-white flex items-center gap-2" id="modal-tx-title">
                         <i data-lucide="receipt" class="w-5 h-5 text-purple-400"></i> Catat Transaksi Baru
@@ -471,7 +706,7 @@
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Nominal (Rp)</label>
                         <div class="relative">
                             <span class="absolute left-4 top-3 text-sm font-bold text-slate-400">Rp</span>
-                            <input type="text" id="tx-amount" oninput="formatNumberInput(this)" placeholder="10.000" required class="w-full pl-11 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-sm font-bold text-white outline-none focus:border-purple-400 transition">
+                            <input type="text" id="tx-amount" inputmode="numeric" pattern="[0-9.]*" autocomplete="off" enterkeyhint="done" oninput="formatNumberInput(this)" placeholder="10.000" required class="w-full pl-11 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-sm font-bold text-white outline-none focus:border-purple-400 transition">
                         </div>
                     </div>
 
@@ -496,13 +731,13 @@
                         <p class="text-[10px] text-slate-400">Ketuk emoji di atas, atau ketik emoji pilihanmu sendiri di kotak kiri.</p>
                         <div class="flex gap-2">
                             <input type="text" id="custom-cat-emoji" placeholder="🏷️" aria-label="Ikon kategori" autocomplete="off" class="w-12 text-center py-2 bg-white/10 border border-white/20 rounded-xl text-base outline-none">
-                            <input type="text" id="custom-cat-name" placeholder="Misal: Skincare, Tagihan" class="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-xs text-white outline-none">
+                            <input type="text" id="custom-cat-name" autocapitalize="words" enterkeyhint="done" placeholder="Misal: Skincare, Tagihan" class="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-xs text-white outline-none">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Catatan / Keterangan</label>
-                        <input type="text" id="tx-note" placeholder="Contoh: Es Kopi Susu, Bensin V-Power" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs text-white outline-none focus:border-purple-400 transition">
+                        <input type="text" id="tx-note" autocapitalize="sentences" enterkeyhint="done" placeholder="Contoh: Es Kopi Susu, Bensin V-Power" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs text-white outline-none focus:border-purple-400 transition">
                     </div>
 
                     <div>
@@ -524,7 +759,7 @@
 
         <!-- MODAL: DAFTAR KATEGORI -->
         <div id="categories-modal" class="fixed inset-0 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-md">
-            <div class="w-full max-w-md glass-modal rounded-t-[32px] sm:rounded-[32px] p-6 space-y-4 border border-white/20 max-h-[90vh] overflow-y-auto">
+            <div class="w-full max-w-md glass-modal rounded-t-[32px] sm:rounded-[32px] p-6 space-y-4 border border-white/20 max-h-[90dvh] overflow-y-auto">
                 <div class="flex justify-between items-center">
                     <h3 class="text-base font-bold text-white flex items-center gap-2">
                         <i data-lucide="layers" class="w-5 h-5 text-purple-400"></i> Daftar Kategori
@@ -542,7 +777,7 @@
                     <p class="text-[10px] text-slate-400">Ketuk emoji di atas, atau ketik emoji pilihanmu sendiri di kotak kiri.</p>
                     <div class="flex gap-2">
                         <input type="text" id="cat-new-emoji" placeholder="🏷️" aria-label="Ikon kategori" autocomplete="off" class="w-12 text-center py-2 bg-white/10 border border-white/20 rounded-xl text-base outline-none">
-                        <input type="text" id="cat-new-name" maxlength="24" placeholder="Misal: Skincare, Tagihan" aria-label="Nama kategori" class="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-xs text-white outline-none focus:border-purple-400">
+                        <input type="text" id="cat-new-name" autocapitalize="words" enterkeyhint="done" maxlength="24" placeholder="Misal: Skincare, Tagihan" aria-label="Nama kategori" class="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-xs text-white outline-none focus:border-purple-400">
                     </div>
                     <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold text-xs rounded-2xl shadow-lg shadow-purple-500/30 transition active:scale-98">Simpan Kategori ✨</button>
                 </form>
@@ -575,7 +810,7 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Alokasi Dana Plotting (Rp)</label>
-                        <input type="text" id="plotting-amount" oninput="formatNumberInput(this)" placeholder="500.000" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
+                        <input type="text" id="plotting-amount" inputmode="numeric" pattern="[0-9.]*" autocomplete="off" enterkeyhint="done" oninput="formatNumberInput(this)" placeholder="500.000" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
                         <p class="text-[10px] text-slate-400 mt-1">Dana ini akan dipisahkan dari Dana Utama.</p>
                     </div>
 
@@ -646,17 +881,17 @@
                 <form onsubmit="handleSaveSavingsGoal(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Barang / Impian</label>
-                        <input type="text" id="goal-title" placeholder="Contoh: Tiket Konser, Sepatu Baru" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs text-white outline-none focus:border-purple-400">
+                        <input type="text" id="goal-title" autocapitalize="words" enterkeyhint="done" placeholder="Contoh: Tiket Konser, Sepatu Baru" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs text-white outline-none focus:border-purple-400">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Harga Target (Rp)</label>
-                        <input type="text" id="goal-target" oninput="formatNumberInput(this)" placeholder="600.000" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
+                        <input type="text" id="goal-target" inputmode="numeric" pattern="[0-9.]*" autocomplete="off" enterkeyhint="done" oninput="formatNumberInput(this)" placeholder="600.000" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
                     </div>
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Tabungan Awal (Opsional)</label>
-                        <input type="text" id="goal-initial" oninput="formatNumberInput(this)" placeholder="100.000" class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs text-white outline-none focus:border-purple-400">
+                        <input type="text" id="goal-initial" inputmode="numeric" pattern="[0-9.]*" autocomplete="off" enterkeyhint="done" oninput="formatNumberInput(this)" placeholder="100.000" class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs text-white outline-none focus:border-purple-400">
                     </div>
 
                     <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold text-xs rounded-2xl shadow-lg transition">
@@ -684,7 +919,7 @@
                     <input type="hidden" id="deposit-goal-id">
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Nominal Tambahan (Rp)</label>
-                        <input type="text" id="deposit-amount" oninput="formatNumberInput(this)" placeholder="50.000" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-sm font-bold text-white outline-none focus:border-emerald-400">
+                        <input type="text" id="deposit-amount" inputmode="numeric" pattern="[0-9.]*" autocomplete="off" enterkeyhint="done" oninput="formatNumberInput(this)" placeholder="50.000" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-sm font-bold text-white outline-none focus:border-emerald-400">
                     </div>
 
                     <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-500 text-white font-bold text-xs rounded-2xl shadow-lg transition">
@@ -730,10 +965,19 @@
                     </div>
                 </div>
 
+                <div class="glass-pill rounded-2xl p-3 space-y-1">
+                    <div class="flex items-center justify-between">
+                        <p class="text-xs font-bold text-white flex items-center gap-2"><span>🫧</span> Tampilan Liquid Glass</p>
+                        <span id="glass-value" class="text-[10px] font-semibold text-purple-300">Seimbang</span>
+                    </div>
+                    <input type="range" id="glass-range" class="lg-range" min="0" max="100" step="1" value="55" aria-label="Kejernihan kaca" oninput="applyGlass(this.value, true)">
+                    <div class="flex justify-between text-[10px] text-slate-400"><span>Jernih</span><span>Berembun</span></div>
+                </div>
+
                 <form onsubmit="handleSaveProfile(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Nama Kamu</label>
-                        <input type="text" id="profile-name-input" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
+                        <input type="text" id="profile-name-input" autocapitalize="words" autocomplete="name" enterkeyhint="done" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
                     </div>
 
                     <div>
@@ -746,7 +990,7 @@
 
                     <div>
                         <label class="block text-xs font-semibold text-slate-300 mb-1">Batas Anggaran Bulanan (Rp)</label>
-                        <input type="text" id="profile-budget-input" oninput="formatNumberInput(this)" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
+                        <input type="text" id="profile-budget-input" inputmode="numeric" pattern="[0-9.]*" autocomplete="off" enterkeyhint="done" oninput="formatNumberInput(this)" required class="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white outline-none focus:border-purple-400">
                     </div>
 
                     <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-2xl transition">
@@ -1093,6 +1337,7 @@
         function initApp() {
             setFaviconFromLogo();
             initEmojiPickers();
+            (function () { const gr = byId('glass-range'); if (gr) { gr.value = window.__glassValue; window.applyGlass(gr.value, false); } })();
             bindOtpBoxes();
             session = readSession();
             if (session) {
@@ -2816,7 +3061,26 @@
         });
 
         /*PWA-JS-START*/
+        function showUpdateBanner() {
+            if (byId('update-banner')) return;
+            const b = document.createElement('div');
+            b.id = 'update-banner';
+            b.setAttribute('role', 'status');
+            b.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 z-[70] w-[calc(100%-2rem)] max-w-sm glass-modal border border-purple-400/40 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-2xl';
+            b.innerHTML = '<span class="text-lg">✨</span>' +
+                '<div class="flex-1 min-w-0"><p class="text-xs font-bold text-white">Versi baru tersedia</p>' +
+                '<p class="text-[10px] text-slate-400">Datamu aman. Muat ulang untuk memakai versi terbaru.</p></div>' +
+                '<button type="button" id="update-reload" class="px-3 py-1.5 rounded-xl bg-purple-600 text-[11px] font-bold text-white active:scale-95">Muat ulang</button>';
+            document.body.appendChild(b);
+            byId('update-reload').onclick = function () { flushAll(); location.reload(); };
+        }
+
         if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            let hadController = !!navigator.serviceWorker.controller;
+            navigator.serviceWorker.addEventListener('controllerchange', function () {
+                if (!hadController) { hadController = true; return; } // pemasangan pertama, bukan update
+                showUpdateBanner();
+            });
             window.addEventListener('load', function () {
                 navigator.serviceWorker.register('sw.js').catch(function (err) { console.warn('Service worker tidak aktif:', err); });
             });

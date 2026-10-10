@@ -3,7 +3,7 @@
    - Data pengguna TIDAK disimpan di sini, melainkan di localStorage browser,
      jadi memperbarui versi cache tidak akan menghapus data.
    Naikkan CACHE_VERSION setiap kali kamu mengubah file aplikasi. */
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v3';
 const CORE_CACHE = 'iwallet-core-' + CACHE_VERSION;
 const RUNTIME_CACHE = 'iwallet-runtime-' + CACHE_VERSION;
 
@@ -44,16 +44,21 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Halaman: coba jaringan dulu (agar update cepat terlihat), jika offline pakai cache.
+  // Halaman: tampilkan salinan cache SEKETIKA (cepat walau sinyal lemah),
+  // lalu ambil versi terbaru di latar belakang untuk pembukaan berikutnya.
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CORE_CACHE).then((c) => c.put('./index.html', copy));
+      caches.match('./index.html').then((cached) => {
+        const network = fetch(req).then((res) => {
+          if (res && res.ok) {
+            const copy = res.clone();
+            caches.open(CORE_CACHE).then((c) => c.put('./index.html', copy));
+          }
           return res;
-        })
-        .catch(() => caches.match('./index.html').then((r) => r || caches.match('./')))
+        }).catch(() => cached);
+        event.waitUntil(network.catch(() => {}));
+        return cached || network;
+      })
     );
     return;
   }
